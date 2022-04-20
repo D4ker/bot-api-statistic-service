@@ -1,13 +1,18 @@
 <template>
   <div class="api-state__container container">
+    <h2>Состояние API</h2>
+    <p>В таблице ниже приведены категории методов, среднее время ответа на запрос и процент успешных ответов.</p>
     <div class="method" v-for="method in filteredApiState" :key="method">
-      <p class="method__name">{{ method.name }}</p>
-      <div class="method__result">
-        <a-icon class="method__check-circle" type="check-circle"/>
-        <p class="method__time">{{ method.time }} мс</p>
-        <div class="method__point">·</div>
-        <p class="method__success">{{ method.success }}</p>
+      <div class="method__body">
+        <p class="method__name">{{ method.name }}</p>
+        <div class="method__result">
+          <a-icon class="method__check" type="check-circle"/>
+          <p class="method__time">{{ method.time }} мс</p>
+          <p class="method__point">·</p>
+          <p class="method__success">{{ method.success }}%</p>
+        </div>
       </div>
+      <hr>
     </div>
   </div>
 </template>
@@ -90,28 +95,39 @@ export default {
   max-width: 900px;
 
   p {
+    color: black;
     margin: 0;
   }
 
   .method {
-    display: flex;
-    justify-content: space-between;
+    .method__body {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px 10px;
 
-    .method__result {
-      display: grid;
-      grid-template-columns: auto 1fr auto 1fr;
-      align-items: center;
-      column-gap: 5px;
+      .method__result {
+        display: grid;
+        grid-template-columns: auto 1fr auto 1fr;
+        align-items: center;
+        column-gap: 5px;
 
-      .method__check {
-        color: #52c41a;
+        .method__check {
+          color: #52c41a;
+        }
+
+        .method__success {
+          justify-self: end;
+          align-self: end;
+          min-width: 20px;
+          color: $color-gray;
+        }
       }
+    }
 
-      .method__success {
-        justify-self: end;
-        align-self: end;
-        min-width: 20px;
-      }
+    hr {
+      border: 0;
+      margin: 0;
+      border-top: 1px solid #ccc;
     }
   }
 }

@@ -1,19 +1,17 @@
 <template>
   <div class="container">
     <div class="header__container">
-      <div class="header__logo">
+      <div class="header__name">
         <nuxt-link to="/">
-<!--          <img src="~/assets/img/selectel-logo-header.svg" alt="Selectel">-->
+          <h1>
+            <span>Bot API Statistic Service</span>
+          </h1>
         </nuxt-link>
       </div>
       <div class="header__contacts">
-        <a class="header__phone" href="tel:88005550675">
-          <p class="header__phone_text">8 800 555 06 75</p>
-<!--          <img class="header__phone_icon" src="~/assets/img/phone.svg" alt="phone">-->
-        </a>
-        <a href="mailto:sales@selectel.ru">
-          <p class="header__mail_text">sales@selectel.ru</p>
-<!--          <img class="header__mail_icon" src="~/assets/img/mail.svg" alt="mail">-->
+        <a href="mailto:bass@mail.ru">
+          <p class="header__mail_text">bass@mail.ru</p>
+          <img class="header__mail_icon" src="~/assets/img/mail.svg" alt="mail">
         </a>
       </div>
     </div>
@@ -36,6 +34,23 @@
     height: $header-height-mobile;
   }
 
+  .header__name {
+    h1 {
+      color: $color-blue;
+      margin: 0;
+
+      @media (max-width: $small-resolution) {
+        span {
+          display: none;
+        }
+
+        &:after {
+          content: 'BASS';
+        }
+      }
+    }
+  }
+
   .header__contacts {
     display: flex;
 
@@ -43,26 +58,18 @@
       color: $color-black;
 
       p {
-        padding: 0;
+        margin: 0;
       }
     }
 
-    .header__phone {
-      margin-right: 16px;
-
-      .header__phone_text {
-        margin-right: 32px;
-      }
-    }
-
-    .header__phone_icon, .header__mail_icon {
+    .header__mail_icon {
       display: none;
       @media (max-width: $small-resolution) {
         display: block;
       }
     }
 
-    .header__phone_text, .header__mail_text {
+    .header__mail_text {
       display: block;
       @media (max-width: $small-resolution) {
         display: none;
