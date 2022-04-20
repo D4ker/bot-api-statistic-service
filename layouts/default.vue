@@ -50,7 +50,7 @@ body {
     flex-grow: 1;
   }
   .footer {
-    background-color: $color-blue;
+    background-color: white;
   }
 }
 </style>

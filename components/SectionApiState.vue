@@ -119,7 +119,7 @@ export default {
           justify-self: end;
           align-self: end;
           min-width: 20px;
-          color: $color-gray;
+          color: $color-gray-light;
         }
       }
     }
