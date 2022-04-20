@@ -44,7 +44,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 999;
-    background-color: white;
+    background-color: $color-blue;
   }
   .main {
     flex-grow: 1;
