@@ -2,7 +2,10 @@
   <div class="api-state__container container">
     <h2>Состояние API</h2>
     <p>В таблице ниже приведены категории методов, среднее время ответа на запрос и процент успешных ответов.</p>
-    <div class="method" v-for="method in filteredApiState" :key="method">
+    <div class="api-state__loader" v-if="loading">
+      <SectionApiStateLoader/>
+    </div>
+    <div v-else class="method" v-for="method in filteredApiState" :key="method.name">
       <div class="method__body">
         <p class="method__name">{{ method.name }}</p>
         <div class="method__result">
@@ -18,9 +21,15 @@
 </template>
 
 <script>
+import SectionApiStateLoader from '@/components/SectionApiStateLoader';
+
 export default {
+  components: {
+    SectionApiStateLoader
+  },
   data: () => ({
-    apiState: []
+    apiState: [],
+    loading: true
   }),
   computed: {
     filteredApiState() {
@@ -86,6 +95,7 @@ export default {
       }
     ];
     this.apiState = res;
+    this.loading = false;
   }
 }
 </script>
@@ -97,6 +107,11 @@ export default {
   p {
     color: black;
     margin: 0;
+  }
+
+  .api-state__loader {
+    display: flex;
+    justify-content: center;
   }
 
   .method {

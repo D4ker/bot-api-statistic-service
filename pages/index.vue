@@ -1,13 +1,17 @@
 <template>
-  <section class="api-state">
-    <SectionApiState/>
-  </section>
+  <div class="main__container">
+    <section class="api-state">
+      <SectionApiState/>
+    </section>
+  </div>
 </template>
 
 <script>
-export default {
-  data: () => ({
+import SectionApiState from '@/components/SectionApiState';
 
-  })
+export default {
+  components: {
+    SectionApiState
+  }
 }
 </script>
