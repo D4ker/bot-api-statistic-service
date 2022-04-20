@@ -53,12 +53,12 @@ export default {
     .footer__nav-container {
       display: flex;
       justify-content: space-evenly;
-      margin: 0;
+      margin: 0 20px;
       padding: 0;
       list-style: none;
 
       .footer__nav-item {
-        margin-left: 40px;
+        margin: 0 20px;
       }
     }
   }

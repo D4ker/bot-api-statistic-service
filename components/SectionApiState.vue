@@ -103,6 +103,7 @@ export default {
 <style scoped lang="scss">
 .api-state__container {
   max-width: 900px;
+  padding: 0 10px;
 
   p {
     color: black;
