@@ -5,14 +5,13 @@
     <div class="api-state__loader" v-if="loading">
       <SectionApiStateLoader/>
     </div>
-    <div v-else class="method" v-for="method in filteredApiState" :key="method.name">
+    <div v-else class="method" v-for="method in filteredApiState" :key="method.id">
       <div class="method__body">
         <p class="method__name">{{ method.name }}</p>
         <div class="method__result">
           <a-icon class="method__check" type="check-circle"/>
-          <p class="method__time">{{ method.time }} мс</p>
-          <p class="method__point">·</p>
-          <p class="method__success">{{ method.success }}%</p>
+          <p class="method__time">{{ cropNum(method.avarageResponseMS) }} мс</p>
+          <p class="method__success">{{ cropNum(method.successRate) }}%</p>
         </div>
       </div>
       <hr>
@@ -36,66 +35,107 @@ export default {
       return this.apiState;
     }
   },
-  mounted() {
+  async mounted() {
     const res = [
       {
+        id: 0,
         name: 'users',
-        time: 64,
-        success: 100
+        successRate: 98.5,
+        avarageResponseMS: 64
       },
       {
+        id: 1,
         name: 'friends',
-        time: 56,
-        success: 100
+        avarageResponseMS: 56,
+        successRate: 100
       },
       {
+        id: 2,
         name: 'groups',
-        time: 70,
-        success: 55
+        avarageResponseMS: 70,
+        successRate: 55
       },
       {
+        id: 3,
         name: 'photos',
-        time: 45,
-        success: 100
+        avarageResponseMS: 45,
+        successRate: 100
       },
       {
+        id: 4,
         name: 'video',
-        time: 68,
-        success: 100
+        avarageResponseMS: 68,
+        successRate: 100
       },
       {
+        id: 5,
         name: 'messages',
-        time: 40,
-        success: 20
+        avarageResponseMS: 40,
+        successRate: 20
       },
       {
+        id: 6,
         name: 'wall',
-        time: 55,
-        success: 64
+        avarageResponseMS: 55,
+        successRate: 64
       },
       {
+        id: 7,
         name: 'newsfeed',
-        time: 67,
-        success: 100
+        avarageResponseMS: 67,
+        successRate: 100
       },
       {
+        id: 8,
         name: 'notes',
-        time: 80,
-        success: 100
+        avarageResponseMS: 80,
+        successRate: 100
       },
       {
+        id: 9,
         name: 'likes',
-        time: 34,
-        success: 100
+        avarageResponseMS: 34,
+        successRate: 100
       },
       {
+        id: 10,
         name: 'pages',
-        time: 52,
-        success: 100
+        avarageResponseMS: 52,
+        successRate: 100
+      },
+      {
+        id: 11,
+        name: 'stars',
+        avarageResponseMS: 42,
+        successRate: 89
+      },
+      {
+        id: 12,
+        name: 'calls',
+        avarageResponseMS: 35,
+        successRate: 100
+      },
+      {
+        id: 13,
+        name: 'audios',
+        avarageResponseMS: 124241188,
+        successRate: 111
+      },
+      {
+        id: 14,
+        name: 'files',
+        avarageResponseMS: 90,
+        successRate: 30
       }
     ];
     this.apiState = res;
     this.loading = false;
+  },
+  methods: {
+    cropNum(num) {
+      const strNum = '' + num;
+      return num >= 1e9 ? '∞' : num >= 1e6 ? `${strNum.slice(0, -6)}KK` : num >= 1e3 ? `${strNum.slice(0, -3)}K` : num
+    }
   }
 }
 </script>
@@ -123,7 +163,7 @@ export default {
 
       .method__result {
         display: grid;
-        grid-template-columns: auto 1fr auto 1fr;
+        grid-template-columns: auto 70px 70px;
         align-items: center;
         column-gap: 5px;
 
@@ -131,10 +171,12 @@ export default {
           color: #52c41a;
         }
 
+        .method__time {
+          justify-self: end;
+        }
+
         .method__success {
           justify-self: end;
-          align-self: end;
-          min-width: 20px;
           color: $color-gray-light;
         }
       }
