@@ -26,6 +26,8 @@
               <p class="method__success">{{ cropNum(method.successRate) }}%</p>
             </div>
             <hr>
+            <apexchart type="line" height="250" :options="getChartOptions(method.id)"
+                       :series="getChartSeries(method.id)"></apexchart>
           </div>
         </a-card>
       </div>
@@ -53,6 +55,7 @@ export default {
   data() {
     return {
       apiState: [],
+      apiStateCharts: [],
       loading: true
     }
   },
@@ -62,179 +65,103 @@ export default {
     }
   },
   async mounted() {
-    const res = [
-      {
-        id: 0,
-        name: 'users',
-        successRate: 98.5,
-        avarageResponseMS: 64
-      },
-      {
-        id: 1,
-        name: 'friends',
-        avarageResponseMS: 56,
-        successRate: 100
-      },
-      {
-        id: 2,
-        name: 'groups',
-        avarageResponseMS: 70,
-        successRate: 55
-      },
-      {
-        id: 3,
-        name: 'photos',
-        avarageResponseMS: 45,
-        successRate: 100
-      },
-      {
-        id: 4,
-        name: 'video',
-        avarageResponseMS: 68,
-        successRate: 100
-      },
-      {
-        id: 5,
-        name: 'messages',
-        avarageResponseMS: 40,
-        successRate: 20
-      },
-      {
-        id: 6,
-        name: 'wall',
-        avarageResponseMS: 55,
-        successRate: 64
-      },
-      {
-        id: 7,
-        name: 'newsfeed',
-        avarageResponseMS: 67,
-        successRate: 100
-      },
-      {
-        id: 8,
-        name: 'notes',
-        avarageResponseMS: 80,
-        successRate: 100
-      },
-      {
-        id: 9,
-        name: 'likes',
-        avarageResponseMS: 34,
-        successRate: 100
-      },
-      {
-        id: 10,
-        name: 'pages',
-        avarageResponseMS: 52,
-        successRate: 100
-      },
-      {
-        id: 11,
-        name: 'stars',
-        avarageResponseMS: 42,
-        successRate: 89
-      },
-      {
-        id: 12,
-        name: 'calls',
-        avarageResponseMS: 35,
-        successRate: 100
-      },
-      {
-        id: 13,
-        name: 'audios',
-        avarageResponseMS: 124241188,
-        successRate: 111
-      },
-      {
-        id: 14,
-        name: 'files',
-        avarageResponseMS: 90,
-        successRate: 30
-      }
+    const methodsNames = [
+      'users',
+      'friends',
+      'groups',
+      'photos',
+      'video',
+      'messages',
+      'wall',
+      'newsfeed',
+      'notes',
+      'likes',
+      'pages',
+      'stars',
+      'calls',
+      'audios',
+      'files'
     ];
-    const graphicsRes = {
-      id: 0,
-      name: "string",
-      events: [
-        {
-          id: 0,
-          success: true,
-          responseMS: 102
-        },
-        {
-          id: 1,
-          success: true,
-          responseMS: 130
-        },
-        {
-          id: 2,
-          success: true,
-          responseMS: 115
-        },
-        {
-          id: 3,
-          success: true,
-          responseMS: 120
-        },
-        {
-          id: 4,
-          success: true,
-          responseMS: 160
-        },
-        {
-          id: 5,
-          success: true,
-          responseMS: 300
-        },
-        {
-          id: 6,
-          success: true,
-          responseMS: 115
-        },
-        {
-          id: 7,
-          success: true,
-          responseMS: 100
-        },
-        {
-          id: 8,
-          success: false,
-          responseMS: 100000
-        },
-        {
-          id: 9,
-          success: false,
-          responseMS: 100000
-        },
-        {
-          id: 10,
-          success: false,
-          responseMS: 100000
-        },
-        {
-          id: 11,
-          success: true,
-          responseMS: 210
-        },
-        {
-          id: 12,
-          success: true,
-          responseMS: 140
-        }
-      ]
-    };
-    this.apiState = res;
+    const apiState = methodsNames.map((value, index) => {
+      return {
+        id: index,
+        name: value,
+        avarageResponseMS: Math.round(Math.random() * 3000),
+        successRate: Math.round(Math.random() * 100)
+      }
+    });
+
+    const apiStateCharts = apiState.map(value => {
+      const eventsSize = Math.round(Math.random() * 40);
+      const events = [];
+      for (let id = 0; id <= eventsSize; id++) {
+        const success = !!Math.round(Math.random());
+        const responseMS = Math.round(success ? Math.random() * 5000 : 5000 + Math.random() * 5000);
+        events.push({
+          id,
+          success,
+          responseMS
+        });
+      }
+      value.events = events;
+      return value;
+    });
+    this.apiState = apiState;
+    this.apiStateCharts = apiStateCharts;
     this.loading = false;
   },
   methods: {
     cropNum(num) {
       const strNum = '' + num;
       return num >= 1e9 ? '∞' : num >= 1e6 ? `${strNum.slice(0, -6)}KK` : num >= 1e3 ? `${strNum.slice(0, -3)}K` : num
+    },
+    getChartSeries(id) {
+      const goodTime = [];
+      const badTime = [];
+      const events = this.apiStateCharts[id].events;
+      if (events.length > 0) {
+        goodTime.push(events[0].success ? events[0].responseMS : null);
+        badTime.push(events[0].success ? null : events[0].responseMS);
+      }
+      for (let i = 1; i < events.length; i++) {
+        if (events[i].success) {
+          goodTime.push(events[i].responseMS);
+          badTime.push(events[i - 1].success ? null : events[i].responseMS);
+        } else {
+          badTime.push(events[i].responseMS);
+          goodTime.push(events[i - 1].success ? events[i].responseMS : null);
+        }
+      }
+      return [{
+        name: 'Good',
+        data: goodTime
+      }, {
+        name: 'Bad',
+        data: badTime
+      }];
+    },
+    getChartOptions(id) {
+      return {
+        chart: {
+          type: 'line',
+          animations: {
+            enabled: false
+          }
+        },
+        stroke: {
+          width: 3,
+          curve: 'smooth'
+        },
+        labels: this.apiStateCharts[id].events.map(value => {
+          return value.id
+        }),
+        xaxis: {
+          tickAmount: 5
+        },
+      };
     }
   }
-}
+};
 </script>
 
 <style scoped lang="scss">
@@ -281,6 +208,10 @@ export default {
         display: flex;
         justify-content: space-evenly;
         align-items: center;
+      }
+
+      hr {
+        margin: 12px 0;
       }
     }
   }
