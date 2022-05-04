@@ -1,17 +1,17 @@
 <template>
   <div class="main__container">
     <section class="api-state">
-      <SectionApiState/>
+      <ApiStateSection/>
     </section>
   </div>
 </template>
 
 <script>
-import SectionApiState from '@/components/SectionApiState';
+import ApiStateSection from '@/components/ApiStateSection';
 
 export default {
   components: {
-    SectionApiState
+    ApiStateSection
   }
 }
 </script>

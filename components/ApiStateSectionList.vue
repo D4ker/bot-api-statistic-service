@@ -1,9 +1,7 @@
 <template>
-  <div class="api-state__container container">
-    <h2>Состояние API</h2>
-    <p>В таблице ниже приведены категории методов, среднее время ответа на запрос и процент успешных ответов.</p>
-    <div class="api-state__loader" v-if="loading">
-      <SectionApiStateLoader/>
+  <div>
+    <div v-if="loading" class="api-state__loader">
+      <ApiStateSectionListLoader/>
     </div>
     <div v-else class="method" v-for="method in filteredApiState" :key="method.id">
       <div class="method__body">
@@ -20,11 +18,11 @@
 </template>
 
 <script>
-import SectionApiStateLoader from '@/components/SectionApiStateLoader';
+import ApiStateSectionListLoader from './ApiStateSectionListLoader';
 
 export default {
   components: {
-    SectionApiStateLoader
+    ApiStateSectionListLoader
   },
   data: () => ({
     apiState: [],
@@ -128,6 +126,77 @@ export default {
         successRate: 30
       }
     ];
+    const graphicsRes = {
+      id: 0,
+      name: "string",
+      events: [
+        {
+          id: 0,
+          success: true,
+          responseMS: 102
+        },
+        {
+          id: 1,
+          success: true,
+          responseMS: 130
+        },
+        {
+          id: 2,
+          success: true,
+          responseMS: 115
+        },
+        {
+          id: 3,
+          success: true,
+          responseMS: 120
+        },
+        {
+          id: 4,
+          success: true,
+          responseMS: 160
+        },
+        {
+          id: 5,
+          success: true,
+          responseMS: 300
+        },
+        {
+          id: 6,
+          success: true,
+          responseMS: 115
+        },
+        {
+          id: 7,
+          success: true,
+          responseMS: 100
+        },
+        {
+          id: 8,
+          success: false,
+          responseMS: 100000
+        },
+        {
+          id: 9,
+          success: false,
+          responseMS: 100000
+        },
+        {
+          id: 10,
+          success: false,
+          responseMS: 100000
+        },
+        {
+          id: 11,
+          success: true,
+          responseMS: 210
+        },
+        {
+          id: 12,
+          success: true,
+          responseMS: 140
+        }
+      ]
+    };
     this.apiState = res;
     this.loading = false;
   },
@@ -141,52 +210,42 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.api-state__container {
-  max-width: 900px;
-  padding: 0 10px;
+.api-state__loader {
+  display: flex;
+  justify-content: center;
+}
 
-  p {
-    color: black;
-    margin: 0;
-  }
-
-  .api-state__loader {
+.method {
+  .method__body {
     display: flex;
-    justify-content: center;
-  }
+    justify-content: space-between;
+    padding: 15px 10px;
 
-  .method {
-    .method__body {
-      display: flex;
-      justify-content: space-between;
-      padding: 15px 10px;
+    .method__result {
+      display: grid;
+      grid-template-columns: auto 70px 70px;
+      align-items: center;
+      column-gap: 5px;
 
-      .method__result {
-        display: grid;
-        grid-template-columns: auto 70px 70px;
-        align-items: center;
-        column-gap: 5px;
+      .method__check {
+        color: #52c41a;
+      }
 
-        .method__check {
-          color: #52c41a;
-        }
+      .method__time {
+        justify-self: end;
+      }
 
-        .method__time {
-          justify-self: end;
-        }
-
-        .method__success {
-          justify-self: end;
-          color: $color-gray-light;
-        }
+      .method__success {
+        justify-self: end;
+        color: $color-gray-light;
       }
     }
+  }
 
-    hr {
-      border: 0;
-      margin: 0;
-      border-top: 1px solid #ccc;
-    }
+  hr {
+    border: 0;
+    margin: 0;
+    border-top: 1px solid #ccc;
   }
 }
 </style>
