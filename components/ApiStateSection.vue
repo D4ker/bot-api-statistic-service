@@ -4,9 +4,13 @@
       <h2>Состояние API</h2>
       <p>В таблице ниже приведены категории методов, среднее время ответа на запрос и процент успешных ответов.</p>
     </div>
-    <ApiStateSectionFilter/>
+    <ApiStateSectionFilter
+      @methodsSortFilter="(recMethodsSortFilter) => this.methodsSortFilter = recMethodsSortFilter"
+      @viewModeFilter="(recViewModeFilter) => this.viewModeFilter = recViewModeFilter"/>
     <div class="api-state__container container">
-      <ApiStateSectionList/>
+      <ApiStateSectionList
+        :methodsSortFilter="methodsSortFilter"
+        :viewModeFilter="viewModeFilter"/>
     </div>
   </div>
 </template>
@@ -19,7 +23,13 @@ export default {
   components: {
     ApiStateSectionFilter,
     ApiStateSectionList
-  }
+  },
+  data() {
+    return {
+      methodsSortFilter: '',
+      viewModeFilter: ''
+    }
+  },
 }
 </script>
 
@@ -27,10 +37,5 @@ export default {
 .api-state__container {
   max-width: $api-state-width;
   padding: 0 10px;
-
-  p {
-    color: black;
-    margin: 0;
-  }
 }
 </style>

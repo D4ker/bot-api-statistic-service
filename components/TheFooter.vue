@@ -19,12 +19,6 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "TheFooter"
-}
-</script>
-
 <style scoped lang="scss">
 .footer__container {
   display: flex;

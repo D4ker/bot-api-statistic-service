@@ -6,7 +6,7 @@
           placeholder="Сортировать"
           style="width: 200px"
           :getPopupContainer="triggerNode => triggerNode.parentElement"
-          @change="handleChange">
+          @change="handleChangeSort">
           <a-select-option value="name">По названию</a-select-option>
           <a-select-option value="time">По времени</a-select-option>
           <a-select-option value="success">По процентам</a-select-option>
@@ -15,7 +15,7 @@
       <a-radio-group
         class="api-state-filter__view-mode"
         default-value="list"
-        @change="onChange">
+        @change="onChangeViewMode">
         <a-radio-button value="list">
           <a-icon type="menu"/>
         </a-radio-button>
@@ -30,11 +30,11 @@
 <script>
 export default {
   methods: {
-    handleChange(value) {
-      console.log(value);
+    handleChangeSort(value) {
+      this.$emit('methodsSortFilter', value);
     },
-    onChange(value) {
-      console.log(value);
+    onChangeViewMode(values) {
+      this.$emit('viewModeFilter', values.target.value);
     }
   }
 }

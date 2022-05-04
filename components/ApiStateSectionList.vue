@@ -3,16 +3,32 @@
     <div v-if="loading" class="api-state__loader">
       <ApiStateSectionListLoader/>
     </div>
-    <div v-else class="method" v-for="method in filteredApiState" :key="method.id">
-      <div class="method__body">
-        <p class="method__name">{{ method.name }}</p>
-        <div class="method__result">
-          <a-icon class="method__check" type="check-circle"/>
-          <p class="method__time">{{ cropNum(method.avarageResponseMS) }} мс</p>
-          <p class="method__success">{{ cropNum(method.successRate) }}%</p>
+    <div v-else class="methods-container">
+      <div v-if="viewModeFilter === 'list' || viewModeFilter === ''" class="methods-list">
+        <div class="method" v-for="method in filteredApiState" :key="method.id">
+          <div class="method__body">
+            <p class="method__name">{{ method.name }}</p>
+            <div class="method__result">
+              <a-icon class="method__check" type="check-circle"/>
+              <p class="method__time">{{ cropNum(method.avarageResponseMS) }} мс</p>
+              <p class="method__success">{{ cropNum(method.successRate) }}%</p>
+            </div>
+          </div>
+          <hr>
         </div>
       </div>
-      <hr>
+      <div v-else class="methods-cards">
+        <a-card class="method-card" v-for="method in filteredApiState" :key="method.id" :title="method.name">
+          <div class="method-card__body">
+            <div class="method-card__result">
+              <a-icon class="method__check" type="check-circle"/>
+              <p class="method__time">{{ cropNum(method.avarageResponseMS) }} мс</p>
+              <p class="method__success">{{ cropNum(method.successRate) }}%</p>
+            </div>
+            <hr>
+          </div>
+        </a-card>
+      </div>
     </div>
   </div>
 </template>
@@ -21,13 +37,25 @@
 import ApiStateSectionListLoader from './ApiStateSectionListLoader';
 
 export default {
+  props: {
+    methodsSortFilter: {
+      type: String,
+      required: true
+    },
+    viewModeFilter: {
+      type: String,
+      required: true
+    }
+  },
   components: {
     ApiStateSectionListLoader
   },
-  data: () => ({
-    apiState: [],
-    loading: true
-  }),
+  data() {
+    return {
+      apiState: [],
+      loading: true
+    }
+  },
   computed: {
     filteredApiState() {
       return this.apiState;
@@ -215,31 +243,59 @@ export default {
   justify-content: center;
 }
 
-.method {
-  .method__body {
-    display: flex;
-    justify-content: space-between;
-    padding: 15px 10px;
+.methods-container {
+  .methods-list {
+    .method {
+      .method__body {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 10px;
 
-    .method__result {
-      display: grid;
-      grid-template-columns: auto 70px 70px;
-      align-items: center;
-      column-gap: 5px;
+        .method__result {
+          display: grid;
+          grid-template-columns: auto 70px 70px;
+          align-items: center;
+          column-gap: 5px;
 
-      .method__check {
-        color: #52c41a;
-      }
+          .method__time {
+            justify-self: end;
+          }
 
-      .method__time {
-        justify-self: end;
-      }
-
-      .method__success {
-        justify-self: end;
-        color: $color-gray-light;
+          .method__success {
+            justify-self: end;
+          }
+        }
       }
     }
+  }
+
+  .methods-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, auto));
+    gap: 20px;
+    margin-top: 24px;
+    justify-content: center;
+
+    .method-card {
+      .method-card__result {
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+      }
+    }
+  }
+
+  .method__success {
+    color: $color-gray-light;
+  }
+
+  .method__check {
+    color: #52c41a;
+  }
+
+  p {
+    color: black;
+    margin: 0;
   }
 
   hr {
