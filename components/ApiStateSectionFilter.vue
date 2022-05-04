@@ -43,8 +43,8 @@ export default {
 <style scoped lang="scss">
 .api-state-filter {
   position: sticky;
-  top: $header-height - 0.1px;
-  z-index: 2;
+  top: $header-height;
+  z-index: 111;
   display: flex;
   align-items: center;
   font-weight: $font-regular;
