@@ -126,10 +126,16 @@ export default {
       for (let i = 1; i < events.length; i++) {
         if (events[i].success) {
           goodTime.push(events[i].responseMS);
-          badTime.push(events[i - 1].success ? null : events[i].responseMS);
+          badTime.push(null);
+          if (!events[i - 1].success) {
+            goodTime[i - 1] = events[i - 1].responseMS;
+          }
         } else {
           badTime.push(events[i].responseMS);
-          goodTime.push(events[i - 1].success ? events[i].responseMS : null);
+          goodTime.push(null);
+          if (events[i - 1].success) {
+            badTime[i - 1] = events[i - 1].responseMS;
+          }
         }
       }
       return [{
@@ -148,6 +154,7 @@ export default {
             enabled: false
           }
         },
+        colors:['#00e396', '#ff0040'],
         stroke: {
           width: 3,
           curve: 'smooth'
