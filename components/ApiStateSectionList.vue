@@ -26,8 +26,8 @@
               <p class="method__success">{{ cropNum(method.successRate) }}%</p>
             </div>
             <hr>
-            <apexchart type="line" height="250" :options="getChartOptions(method.id)"
-                       :series="getChartSeries(method.id)"></apexchart>
+            <apexchart type="line" height="250" :options="chartsOptions[method.id]"
+                       :series="chartsSeries[method.id]"></apexchart>
           </div>
         </a-card>
       </div>
@@ -57,6 +57,8 @@ export default {
     return {
       apiState: [],
       apiStateCharts: [],
+      chartsOptions: [],
+      chartsSeries: [],
       loading: true
     }
   },
@@ -73,6 +75,11 @@ export default {
     // Фейковые данные для тестов
     this.apiState = Faker().getApiState();
     this.apiStateCharts = Faker().getApiStateCharts(this.apiState);
+
+    for (const chart of this.apiStateCharts) {
+      this.chartsOptions.push(this.getChartOptions(chart));
+      this.chartsSeries.push(this.getChartSeries(chart));
+    }
 
     this.loading = false;
   },
@@ -107,10 +114,10 @@ export default {
       const strNum = '' + num;
       return num >= 1e9 ? '∞' : num >= 1e6 ? `${strNum.slice(0, -6)}KK` : num >= 1e3 ? `${strNum.slice(0, -3)}K` : num
     },
-    getChartSeries(id) {
+    getChartSeries(chart) {
       const goodTime = [];
       const badTime = [];
-      const events = this.apiStateCharts[id].events;
+      const events = chart.events;
       if (events.length > 0) {
         goodTime.push(events[0].success ? events[0].responseMS : null);
         badTime.push(events[0].success ? null : events[0].responseMS);
@@ -138,7 +145,7 @@ export default {
         data: badTime
       }];
     },
-    getChartOptions(id) {
+    getChartOptions(chart) {
       return {
         chart: {
           type: 'line',
@@ -151,7 +158,7 @@ export default {
           width: 3,
           curve: 'smooth'
         },
-        labels: this.apiStateCharts[id].events.map(value => {
+        labels: chart.events.map(value => {
           return value.id
         }),
         xaxis: {
