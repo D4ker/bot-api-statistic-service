@@ -37,6 +37,7 @@
 
 <script>
 import ApiStateSectionListLoader from './ApiStateSectionListLoader';
+import Faker from "../modules/faker";
 
 export default {
   props: {
@@ -65,52 +66,43 @@ export default {
     }
   },
   async mounted() {
-    const methodsNames = [
-      'users',
-      'friends',
-      'groups',
-      'photos',
-      'video',
-      'messages',
-      'wall',
-      'newsfeed',
-      'notes',
-      'likes',
-      'pages',
-      'stars',
-      'calls',
-      'audios',
-      'files'
-    ];
-    const apiState = methodsNames.map((value, index) => {
-      return {
-        id: index,
-        name: value,
-        avarageResponseMS: Math.round(Math.random() * 3000),
-        successRate: Math.round(Math.random() * 100)
-      }
-    });
+    const service = 'all';
+    this.apiState = await this.getApiState(service);
+    this.apiStateCharts = await this.getApiStateCharts(this.apiState);
 
-    const apiStateCharts = apiState.map(value => {
-      const eventsSize = Math.round(Math.random() * 40);
-      const events = [];
-      for (let id = 0; id <= eventsSize; id++) {
-        const success = !!Math.round(Math.random());
-        const responseMS = Math.round(success ? Math.random() * 5000 : 5000 + Math.random() * 5000);
-        events.push({
-          id,
-          success,
-          responseMS
-        });
-      }
-      value.events = events;
-      return value;
-    });
-    this.apiState = apiState;
-    this.apiStateCharts = apiStateCharts;
+    // Фейковые данные для тестов
+    this.apiState = Faker().getApiState();
+    this.apiStateCharts = Faker().getApiStateCharts(this.apiState);
+
     this.loading = false;
   },
   methods: {
+    async getApiState(service) {
+      const apiState = await fetch(`/endpoints/${service}`);
+      if (apiState.ok) {
+        this.apiState = await apiState.json();
+      } else {
+        this.apiState = [];
+      }
+    },
+    async getApiStateCharts(apiState) {
+      const apiStateCharts = [];
+      for (const method in apiState) {
+        const endpointId = method.id;
+        const apiStateChart = await fetch(`/endpoint/${endpointId}`);
+        if (apiStateChart.ok) {
+          const apiStateChartJson = await apiStateChart.json();
+          apiStateCharts.push(apiStateChartJson);
+        } else {
+          // Если сервер не вернул данные по заданному методу
+          apiStateCharts.push({
+            id: endpointId,
+            name: method.name,
+            events: null
+          });
+        }
+      }
+    },
     cropNum(num) {
       const strNum = '' + num;
       return num >= 1e9 ? '∞' : num >= 1e6 ? `${strNum.slice(0, -6)}KK` : num >= 1e3 ? `${strNum.slice(0, -3)}K` : num
@@ -154,7 +146,7 @@ export default {
             enabled: false
           }
         },
-        colors:['#00e396', '#ff0040'],
+        colors: ['#00e396', '#ff0040'],
         stroke: {
           width: 3,
           curve: 'smooth'

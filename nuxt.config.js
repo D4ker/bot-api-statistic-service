@@ -50,7 +50,8 @@ export default {
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
-    '@nuxtjs/style-resources'
+    '@nuxtjs/style-resources',
+    '~/modules/faker.js'
   ],
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
