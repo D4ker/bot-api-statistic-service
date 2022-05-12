@@ -70,6 +70,21 @@ export default {
   },
   computed: {
     filteredApiState() {
+      if (this.methodsSortFilter === 'name') {
+        return this.apiState.sort((m1, m2) => {
+          const name1 = m1.name.toLowerCase();
+          const name2 = m2.name.toLowerCase();
+          return name1 < name2 ? -1 : name1 > name2 ? 1 : 0;
+        });
+      } else if (this.methodsSortFilter === 'time') {
+        return this.apiState.sort((m1, m2) => {
+          return m2.avarageResponseMS - m1.avarageResponseMS;
+        });
+      } else if (this.methodsSortFilter === 'success') {
+        return this.apiState.sort((m1, m2) => {
+          return m1.successRate - m2.successRate;
+        });
+      }
       return this.apiState;
     }
   },
