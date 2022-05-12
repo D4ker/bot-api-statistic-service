@@ -14,7 +14,7 @@
       </div>
       <a-radio-group
         class="api-state-filter__view-mode"
-        default-value="list"
+        v-model="viewModeFilter"
         @change="onChangeViewMode">
         <a-radio-button value="list">
           <a-icon type="menu"/>
@@ -29,12 +29,23 @@
 
 <script>
 export default {
+  data() {
+    return {
+      viewModeFilter: 'list'
+    }
+  },
+  mounted() {
+    this.sendViewMode(this.viewModeFilter);
+  },
   methods: {
     handleChangeSort(value) {
       this.$emit('methodsSortFilter', value);
     },
     onChangeViewMode(values) {
-      this.$emit('viewModeFilter', values.target.value);
+      this.sendViewMode(values.target.value);
+    },
+    sendViewMode(value) {
+      this.$emit('viewModeFilter', value);
     }
   }
 }

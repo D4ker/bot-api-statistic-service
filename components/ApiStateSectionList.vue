@@ -4,33 +4,39 @@
       <ApiStateSectionListLoader/>
     </div>
     <div v-else class="methods-container">
-      <div v-if="viewModeFilter === 'list' || viewModeFilter === ''" class="methods-list">
-        <div class="method" v-for="method in filteredApiState" :key="method.id">
-          <div class="method__body">
-            <p class="method__name">{{ method.name }}</p>
-            <div class="method__result">
-              <a-icon class="method__check" type="check-circle"/>
-              <p class="method__time">{{ cropNum(method.avarageResponseMS) }} мс</p>
-              <p class="method__success">{{ cropNum(method.successRate) }}%</p>
+      <a-tabs type="card" :activeKey="viewModeFilter">
+        <a-tab-pane key="list" tab="">
+          <div class="methods-list">
+            <div class="method" v-for="method in filteredApiState" :key="method.id">
+              <div class="method__body">
+                <p class="method__name">{{ method.name }}</p>
+                <div class="method__result">
+                  <a-icon class="method__check" type="check-circle"/>
+                  <p class="method__time">{{ cropNum(method.avarageResponseMS) }} мс</p>
+                  <p class="method__success">{{ cropNum(method.successRate) }}%</p>
+                </div>
+              </div>
+              <hr>
             </div>
           </div>
-          <hr>
-        </div>
-      </div>
-      <div v-else class="methods-cards">
-        <a-card class="method-card" v-for="method in filteredApiState" :key="method.id" :title="method.name">
-          <div class="method-card__body">
-            <div class="method-card__result">
-              <a-icon class="method__check" type="check-circle"/>
-              <p class="method__time">{{ cropNum(method.avarageResponseMS) }} мс</p>
-              <p class="method__success">{{ cropNum(method.successRate) }}%</p>
-            </div>
-            <hr>
-            <apexchart type="line" height="250" :options="chartsOptions[method.id]"
-                       :series="chartsSeries[method.id]"></apexchart>
+        </a-tab-pane>
+        <a-tab-pane key="cards" tab="" :forceRender="true">
+          <div class="methods-cards">
+            <a-card class="method-card" v-for="method in filteredApiState" :key="method.id" :title="method.name">
+              <div class="method-card__body">
+                <div class="method-card__result">
+                  <a-icon class="method__check" type="check-circle"/>
+                  <p class="method__time">{{ cropNum(method.avarageResponseMS) }} мс</p>
+                  <p class="method__success">{{ cropNum(method.successRate) }}%</p>
+                </div>
+                <hr>
+                <apexchart type="line" height="250" :options="chartsOptions[method.id]"
+                           :series="chartsSeries[method.id]"></apexchart>
+              </div>
+            </a-card>
           </div>
-        </a-card>
-      </div>
+        </a-tab-pane>
+      </a-tabs>
     </div>
   </div>
 </template>
@@ -177,6 +183,11 @@ export default {
 }
 
 .methods-container {
+
+  ::v-deep .ant-tabs-bar {
+    display: none;
+  }
+
   .methods-list {
     .method {
       .method__body {
