@@ -30,8 +30,10 @@
                   <p class="method__success">{{ cropNum(method.successRate) }}%</p>
                 </div>
                 <hr>
-                <apexchart type="line" height="250" :options="chartsOptions[method.id]"
-                           :series="chartsSeries[method.id]"></apexchart>
+                <div class="method__chart">
+                  <apexchart type="line" height="100%" :options="chartsOptions[method.id]"
+                             :series="chartsSeries[method.id]"></apexchart>
+                </div>
               </div>
             </a-card>
           </div>
@@ -159,10 +161,10 @@ export default {
         }
       }
       return [{
-        name: 'Good',
+        name: '',
         data: goodTime
       }, {
-        name: 'Bad',
+        name: '',
         data: badTime
       }];
     },
@@ -170,9 +172,23 @@ export default {
       return {
         chart: {
           type: 'line',
+          height: 250,
+          toolbar: {
+            show: false
+          },
           animations: {
             enabled: false
           }
+        },
+        legend: {
+          show: false
+        },
+        tooltip: {
+          enabled: true,
+          shared: false,
+          marker: {
+            show: false,
+          },
         },
         colors: ['#00e396', '#ff0040'],
         stroke: {
@@ -244,6 +260,10 @@ export default {
 
       hr {
         margin: 12px 0;
+      }
+
+      .method__chart {
+        height: 250px;
       }
     }
   }
