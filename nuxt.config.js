@@ -20,8 +20,15 @@ export default {
     ]
   },
 
-  server: {
-    port: 8080
+  axios: {
+    proxy: true
+  },
+
+  proxy: {
+    "/api/": {
+      target: "http://localhost:8080",
+      pathRewrite: {"^/api/": "/"}
+    }
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
@@ -55,6 +62,7 @@ export default {
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     '@nuxtjs/style-resources',
+    '@nuxtjs/axios',
     '~/modules/faker.js'
   ],
 

@@ -106,7 +106,7 @@ export default {
   },
   methods: {
     async getApiState(service) {
-      const apiState = await fetch(`/endpoints/${service}`);
+      const apiState = await fetch(`/api/endpoints/${service}`);
       if (apiState.ok) {
         this.apiState = await apiState.json();
       } else {
@@ -117,7 +117,7 @@ export default {
       const apiStateCharts = [];
       for (const method in apiState) {
         const endpointId = method.id;
-        const apiStateChart = await fetch(`/endpoint/${endpointId}`);
+        const apiStateChart = await fetch(`/api/endpoint/${endpointId}`);
         if (apiStateChart.ok) {
           const apiStateChartJson = await apiStateChart.json();
           apiStateCharts.push(apiStateChartJson);
