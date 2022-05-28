@@ -9,7 +9,7 @@
           <div class="methods-list">
             <div class="method" v-for="method in filteredApiState" :key="method.id">
               <div class="method__body">
-                <p class="method__name">{{ method.name }}</p>
+                <p class="method__name">{{ method.name }}: {{ method.method }}</p>
                 <div class="method__result">
                   <a-icon class="method__check" type="check-circle"/>
                   <p class="method__time">{{ cropNum(method.avarageResponseMS) }} мс</p>
@@ -22,7 +22,8 @@
         </a-tab-pane>
         <a-tab-pane key="cards" tab="" :forceRender="true">
           <div class="methods-cards">
-            <a-card class="method-card" v-for="method in filteredApiState" :key="method.id" :title="method.name">
+            <a-card class="method-card" v-for="method in filteredApiState" :key="method.id"
+                    :title="`${method.name}: ${method.method}`">
               <div class="method-card__body">
                 <div class="method-card__result">
                   <a-icon class="method__check" type="check-circle"/>
@@ -31,7 +32,7 @@
                 </div>
                 <hr>
                 <div class="method__chart">
-                  <apexchart type="line" height="100%" :options="chartsOptions[method.id]"
+                  <apexchart type="area" height="100%" :options="chartsOptions[method.id]"
                              :series="chartsSeries[method.id]"></apexchart>
                 </div>
               </div>
@@ -141,22 +142,23 @@ export default {
       const goodTime = [];
       const badTime = [];
       const events = chart.events;
+      const badTimeConst = 0;
       if (events.length > 0) {
         goodTime.push(events[0].success ? events[0].responseMS : null);
-        badTime.push(events[0].success ? null : events[0].responseMS);
+        badTime.push(events[0].success ? null : badTimeConst);
       }
       for (let i = 1; i < events.length; i++) {
         if (events[i].success) {
           goodTime.push(events[i].responseMS);
           badTime.push(null);
           if (!events[i - 1].success) {
-            goodTime[i - 1] = events[i - 1].responseMS;
+            goodTime[i - 1] = badTimeConst;
           }
         } else {
-          badTime.push(events[i].responseMS);
+          badTime.push(badTimeConst);
           goodTime.push(null);
           if (events[i - 1].success) {
-            badTime[i - 1] = events[i - 1].responseMS;
+            goodTime[i] = badTimeConst;
           }
         }
       }
@@ -171,23 +173,33 @@ export default {
     getChartOptions(chart) {
       return {
         chart: {
-          type: 'line',
+          type: 'area',
           height: 250,
           toolbar: {
             show: false
+          },
+          zoom: {
+            enabled: false
           },
           animations: {
             enabled: false
           }
         },
+        dataLabels: {
+          enabled: false
+        },
         legend: {
           show: false
         },
         tooltip: {
-          enabled: true,
+          theme: 'dark',
           shared: false,
           marker: {
             show: false,
+          },
+          x: {
+            show: false,
+            format: 'dd-MM-yy HH:mm:ss'
           },
         },
         colors: ['#00e396', '#ff0040'],
@@ -195,11 +207,12 @@ export default {
           width: 3,
           curve: 'smooth'
         },
-        labels: chart.events.map(value => {
-          return value.id
-        }),
         xaxis: {
-          tickAmount: 5
+          type: 'datetime',
+          categories: chart.events.map(value => {
+            const date = new Date(value.requestTime);
+            return date.toISOString();
+          })
         },
       };
     }

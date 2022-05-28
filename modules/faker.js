@@ -18,14 +18,27 @@ export default function Faker() {
       'audios',
       'files'
     ];
-    return methodsNames.map((value, index) => {
-      return {
-        id: index,
-        name: value,
-        avarageResponseMS: Math.round(Math.random() * 3000),
-        successRate: Math.round(Math.random() * 100)
+    const restMethods = [
+      'GET',
+      'POST',
+      'DELETE',
+      'UPDATE'
+    ];
+    const apiState = [];
+    let index = 0;
+    for (const methodName of methodsNames) {
+      for (const restMethod of restMethods) {
+        apiState.push({
+          id: index,
+          name: methodName,
+          avarageResponseMS: Math.round(Math.random() * 3000),
+          successRate: Math.round(Math.random() * 100),
+          method: restMethod
+        });
+        index++;
       }
-    });
+    }
+    return apiState;
   }
 
   function getApiStateCharts(apiState) {
@@ -34,11 +47,15 @@ export default function Faker() {
       const events = [];
       for (let id = 0; id <= eventsSize; id++) {
         const success = !!Math.round(Math.random());
-        const responseMS = Math.round(success ? Math.random() * 5000 : 5000 + Math.random() * 5000);
+        const responseMS = success ? Math.round(Math.random() * 15000) : null;
+        const responseCode = Math.round(success ? 200 + Math.random() * 100 : 300 + Math.random() * 300);
+        const requestTime = new Date('2016-07-25').getTime() + id * 1000;
         events.push({
           id,
           success,
-          responseMS
+          responseMS,
+          responseCode,
+          requestTime
         });
       }
       value.events = events;
