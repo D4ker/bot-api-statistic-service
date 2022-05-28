@@ -192,7 +192,7 @@ export default {
           show: false
         },
         tooltip: {
-          custom: function({series, dataPointIndex, w}) {
+          custom: function ({series, dataPointIndex, w}) {
             let goodTimeValue = series[0][dataPointIndex];
             let badTimeValue = series[1][dataPointIndex];
             goodTimeValue = goodTimeValue > 0 ? goodTimeValue : '';

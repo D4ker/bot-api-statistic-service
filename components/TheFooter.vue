@@ -24,6 +24,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   height: $footer-height;
   padding: $footer-padding;
 
@@ -41,18 +42,26 @@
 
   .footer__nav {
     display: flex;
-    justify-content: flex-start;
     flex-grow: 1;
+
+    @media (max-width: $small-resolution) {
+      min-width: 100%;
+      order: -1;
+    }
 
     .footer__nav-container {
       display: flex;
       justify-content: space-evenly;
-      margin: 0 20px;
-      padding: 0;
+      margin: 0;
+      padding-left: 40px;
       list-style: none;
 
+      @media (max-width: $small-resolution) {
+        padding: 0;
+      }
+
       .footer__nav-item {
-        margin: 0 20px;
+        margin-right: 40px;
       }
     }
   }
