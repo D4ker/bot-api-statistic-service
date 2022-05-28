@@ -192,21 +192,23 @@ export default {
           show: false
         },
         tooltip: {
+          custom: function({series, dataPointIndex, w}) {
+            let goodTimeValue = series[0][dataPointIndex];
+            let badTimeValue = series[1][dataPointIndex];
+            goodTimeValue = goodTimeValue > 0 ? goodTimeValue : '';
+            badTimeValue = badTimeValue === 0 ? badTimeValue : '';
+            return '<div class="arrow_box">' +
+              '<span>' + goodTimeValue + '</span>' +
+              '<div></div>' +
+              '<span>' + badTimeValue + '</span>' +
+              '</div>'
+          },
           theme: 'dark',
-          shared: false,
-          marker: {
-            show: false,
-          },
           x: {
-            show: false,
             format: 'dd-MM-yy HH:mm:ss'
-          },
+          }
         },
         colors: ['#00e396', '#ff0040'],
-        stroke: {
-          width: 3,
-          curve: 'smooth'
-        },
         xaxis: {
           type: 'datetime',
           categories: chart.events.map(value => {
