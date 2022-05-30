@@ -51,7 +51,8 @@
 
     .footer__nav-container {
       display: flex;
-      justify-content: space-evenly;
+      justify-content: flex-start;
+      flex-wrap: wrap;
       margin: 0;
       padding-left: 40px;
       list-style: none;

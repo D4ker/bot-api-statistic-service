@@ -46,8 +46,8 @@ export default function Faker() {
       const eventsSize = Math.round(Math.random() * length);
       const events = [];
       for (let id = 0; id <= eventsSize; id++) {
-        const success = !!Math.round(Math.random());
-        const responseMS = success ? Math.round(Math.random() * 15000) : null;
+        const success = events.length > 0 && !events[id - 1].success ? Math.random() < 0.3 : Math.random() < 0.9;
+        const responseMS = !success ? null : Math.random() > 0.98 ? Math.round(Math.random() * 3000) : Math.round(Math.random() * 300);
         const responseCode = Math.round(success ? 200 + Math.random() * 100 : 300 + Math.random() * 300);
         const requestTime = new Date('2016-07-25').getTime() + id * 1000;
         events.push({

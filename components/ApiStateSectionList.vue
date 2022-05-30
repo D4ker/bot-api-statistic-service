@@ -178,6 +178,10 @@ export default {
       }];
     },
     getChartOptions(chart) {
+      let yMax = Math.max(...chart.events.map(event => {
+        return event.responseMS;
+      }));
+      yMax = yMax < 500 ? 500 : yMax;
       return {
         chart: {
           type: 'area',
@@ -198,11 +202,14 @@ export default {
         legend: {
           show: false
         },
+        stroke: {
+          width: 2
+        },
         tooltip: {
-          custom: function ({series, dataPointIndex, w}) {
+          custom: function ({series, dataPointIndex}) {
             let goodTimeValue = series[0][dataPointIndex];
             let badTimeValue = series[1][dataPointIndex];
-            goodTimeValue = goodTimeValue >= 0 ? goodTimeValue : '';
+            goodTimeValue = goodTimeValue > 0 ? goodTimeValue : '';
             badTimeValue = badTimeValue === 0 ? badTimeValue : '';
             return '<div class="arrow_box">' +
               '<span>' + goodTimeValue + '</span>' +
@@ -222,6 +229,10 @@ export default {
             const date = new Date(value.requestTime);
             return date.toISOString();
           })
+        },
+        yaxis: {
+          max: yMax,
+          forceNiceScale: true
         },
       };
     }
@@ -268,10 +279,14 @@ export default {
 
   .methods-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, auto));
+    grid-template-columns: repeat(auto-fit, minmax(calc((#{$small-resolution} - 40px) / 2), 1fr));
     gap: 20px;
     margin-top: 24px;
     justify-content: center;
+
+    @media (max-width: $small-resolution) {
+      grid-template-columns: minmax(100%, auto);
+    }
 
     .method-card {
       .method-card__result {

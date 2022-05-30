@@ -4,7 +4,7 @@
       <div class="api-state-filter__sort">
         <a-select
           placeholder="Сортировать"
-          style="width: 200px"
+          style="width: 100%"
           :getPopupContainer="triggerNode => triggerNode.parentElement"
           @change="handleChangeSort">
           <a-select-option value="name">По названию</a-select-option>
@@ -15,6 +15,7 @@
       <a-radio-group
         class="api-state-filter__view-mode"
         v-model="viewModeFilter"
+        style="display: flex"
         @change="onChangeViewMode">
         <a-radio-button value="list">
           <a-icon type="menu"/>
@@ -71,6 +72,10 @@ export default {
     justify-content: space-between;
     max-width: $api-state-width;
     padding: 0 10px;
+
+    .api-state-filter__sort {
+      width: 200px;
+    }
 
     .api-state-filter__view-mode {
       font-size: 20px;
