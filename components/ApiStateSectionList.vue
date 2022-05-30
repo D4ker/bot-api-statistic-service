@@ -12,7 +12,7 @@
                 <p class="method__name">{{ method.name }}: {{ method.method }}</p>
                 <div class="method__result">
                   <a-icon class="method__check" type="check-circle"/>
-                  <p class="method__time">{{ cropNum(method.avarageResponseMS) }} мс</p>
+                  <p class="method__time">{{ cropNum(method.averageResponseMS) }} мс</p>
                   <p class="method__success">{{ cropNum(method.successRate) }}%</p>
                 </div>
               </div>
@@ -27,7 +27,7 @@
               <div class="method-card__body">
                 <div class="method-card__result">
                   <a-icon class="method__check" type="check-circle"/>
-                  <p class="method__time">{{ cropNum(method.avarageResponseMS) }} мс</p>
+                  <p class="method__time">{{ cropNum(method.averageResponseMS) }} мс</p>
                   <p class="method__success">{{ cropNum(method.successRate) }}%</p>
                 </div>
                 <hr>
@@ -81,7 +81,7 @@ export default {
         });
       } else if (this.methodsSortFilter === 'time') {
         return this.apiState.sort((m1, m2) => {
-          return m2.avarageResponseMS - m1.avarageResponseMS;
+          return m2.averageResponseMS - m1.averageResponseMS;
         });
       } else if (this.methodsSortFilter === 'success') {
         return this.apiState.sort((m1, m2) => {
@@ -93,16 +93,18 @@ export default {
   },
   async mounted() {
     const service = 'all';
+    const offset = 0;
+    const length = 100;
     this.apiState = await this.getApiState(service);
-    this.apiStateCharts = await this.getApiStateCharts(this.apiState);
+    this.apiStateCharts = await this.getApiStateCharts(this.apiState, offset, length);
 
     // Фейковые данные для тестов
     this.apiState = Faker().getApiState();
-    this.apiStateCharts = Faker().getApiStateCharts(this.apiState);
+    this.apiStateCharts = Faker().getApiStateCharts(this.apiState, length);
 
     for (const chart of this.apiStateCharts) {
-      this.chartsOptions.push(this.getChartOptions(chart));
-      this.chartsSeries.push(this.getChartSeries(chart));
+      this.chartsOptions[chart.id] = this.getChartOptions(chart);
+      this.chartsSeries[chart.id] = this.getChartSeries(chart);
     }
 
     this.loading = false;
@@ -111,18 +113,21 @@ export default {
     async getApiState(service) {
       const apiState = await fetch(`/api/endpoints/${service}`);
       if (apiState.ok) {
-        this.apiState = await apiState.json();
+        return await apiState.json();
       } else {
-        this.apiState = [];
+        return [];
       }
     },
-    async getApiStateCharts(apiState) {
+    async getApiStateCharts(apiState, offset, length) {
       const apiStateCharts = [];
-      for (const method in apiState) {
+      for (const method of apiState) {
         const endpointId = method.id;
-        const apiStateChart = await fetch(`/api/endpoint/${endpointId}`);
+        const apiStateChart = await fetch(`/api/endpoint/${endpointId}?offset=${offset}&length=${length}`);
         if (apiStateChart.ok) {
           const apiStateChartJson = await apiStateChart.json();
+          apiStateChartJson.events.sort((ev1, ev2) => {
+            return ev1.requestTime - ev2.requestTime;
+          });
           apiStateCharts.push(apiStateChartJson);
         } else {
           // Если сервер не вернул данные по заданному методу
@@ -133,6 +138,8 @@ export default {
           });
         }
       }
+
+      return apiStateCharts;
     },
     cropNum(num) {
       const strNum = '' + num;
@@ -195,7 +202,7 @@ export default {
           custom: function ({series, dataPointIndex, w}) {
             let goodTimeValue = series[0][dataPointIndex];
             let badTimeValue = series[1][dataPointIndex];
-            goodTimeValue = goodTimeValue > 0 ? goodTimeValue : '';
+            goodTimeValue = goodTimeValue >= 0 ? goodTimeValue : '';
             badTimeValue = badTimeValue === 0 ? badTimeValue : '';
             return '<div class="arrow_box">' +
               '<span>' + goodTimeValue + '</span>' +

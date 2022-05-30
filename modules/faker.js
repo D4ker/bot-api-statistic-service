@@ -31,7 +31,7 @@ export default function Faker() {
         apiState.push({
           id: index,
           name: methodName,
-          avarageResponseMS: Math.round(Math.random() * 3000),
+          averageResponseMS: Math.round(Math.random() * 3000),
           successRate: Math.round(Math.random() * 100),
           method: restMethod
         });
@@ -41,9 +41,9 @@ export default function Faker() {
     return apiState;
   }
 
-  function getApiStateCharts(apiState) {
+  function getApiStateCharts(apiState, length) {
     return apiState.map(value => {
-      const eventsSize = Math.round(Math.random() * 40);
+      const eventsSize = Math.round(Math.random() * length);
       const events = [];
       for (let id = 0; id <= eventsSize; id++) {
         const success = !!Math.round(Math.random());
