@@ -110,12 +110,7 @@ export default {
       // Фейковые данные для тестов
       this.apiState[interval.period] = Faker().getApiState(interval.frequency, interval.period);
 
-      this.apiState[interval.period].forEach(method => {
-        const statLength =  method.statistics.length;
-        method.fullname = method.name + ': ' + method.method;
-        method.successRate = Math.round(method.statistics.reduce((p, c) => p + c.successRate, 0) / statLength);
-        method.averageResponseMS = Math.round(method.statistics.reduce((p, c) => p + c.averageResponseMS, 0) / statLength);
-      });
+      this.apiState[interval.period].forEach(method => method.fullname = method.name + ': ' + method.method);
     }
 
     for (const period in this.apiState) {

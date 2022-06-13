@@ -28,10 +28,14 @@ export default function Faker() {
     let id = 0;
     for (const name of methodsNames) {
       for (const method of restMethods) {
+        const successRate = Math.round(Math.random() * 100);
+        const averageResponseMS = Math.random() > 0.98 ? Math.round(Math.random() * 3000) : Math.round(Math.random() * 300);
         const statistics = getApiStateCharts(apiState, frequency, period);
         apiState.push({
           id,
           name,
+          successRate,
+          averageResponseMS,
           statistics,
           method
         });
