@@ -1,6 +1,6 @@
 // Модуль генерации фейковых данных для тестов
 export default function Faker() {
-  function getApiState() {
+  function getApiState(frequency, period) {
     const methodsNames = [
       'users',
       'friends',
@@ -25,42 +25,37 @@ export default function Faker() {
       'UPDATE'
     ];
     const apiState = [];
-    let index = 0;
-    for (const methodName of methodsNames) {
-      for (const restMethod of restMethods) {
+    let id = 0;
+    for (const name of methodsNames) {
+      for (const method of restMethods) {
+        const statistics = getApiStateCharts(apiState, frequency, period);
         apiState.push({
-          id: index,
-          name: methodName,
-          averageResponseMS: Math.round(Math.random() * 3000),
-          successRate: Math.round(Math.random() * 100),
-          method: restMethod
+          id,
+          name,
+          statistics,
+          method
         });
-        index++;
+        id++;
       }
     }
     return apiState;
   }
 
-  function getApiStateCharts(apiState, length) {
-    return apiState.map(value => {
-      const eventsSize = Math.round(Math.random() * length);
-      const events = [];
-      for (let id = 0; id <= eventsSize; id++) {
-        const success = events.length > 0 && !events[id - 1].success ? Math.random() < 0.3 : Math.random() < 0.9;
-        const responseMS = !success ? null : Math.random() > 0.98 ? Math.round(Math.random() * 3000) : Math.round(Math.random() * 300);
-        const responseCode = Math.round(success ? 200 + Math.random() * 100 : 300 + Math.random() * 300);
-        const requestTime = new Date('2016-07-25').getTime() + id * 1000;
-        events.push({
-          id,
-          success,
-          responseMS,
-          responseCode,
-          requestTime
-        });
-      }
-      value.events = events;
-      return value;
-    });
+  function getApiStateCharts(apiState, frequency, period) {
+    const pointsCount = frequency * period;
+    const statistics = [];
+    for (let id = 0; id <= pointsCount; id++) {
+      const success = statistics.length > 0 && statistics[id - 1].averageResponseMS === null ? Math.random() < 0.3 : Math.random() < 0.9;
+      const successRate = !success ? null : Math.round(Math.random() * 100);
+      const averageResponseMS = !success ? null : Math.random() > 0.98 ? Math.round(Math.random() * 3000) : Math.round(Math.random() * 300);
+      const bindPoint = new Date().setHours(0, 0, 0, 0) - (pointsCount - id) * 1000 * 60 * 60 * 24 / frequency;
+      statistics.push({
+        successRate,
+        averageResponseMS,
+        bindPoint
+      });
+    }
+    return statistics;
   }
 
   return {

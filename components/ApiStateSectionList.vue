@@ -9,7 +9,7 @@
           <div class="methods-list">
             <div class="method" v-for="method in filteredApiState" :key="method.id">
               <div class="method__body">
-                <p class="method__name">{{ method.name }}: {{ method.method }}</p>
+                <p class="method__name">{{ method.fullname }}</p>
                 <div class="method__result">
                   <a-icon class="method__check" type="check-circle"/>
                   <p class="method__time">{{ cropNum(method.averageResponseMS) }} мс</p>
@@ -23,7 +23,7 @@
         <a-tab-pane key="cards" tab="" :forceRender="true">
           <div class="methods-cards">
             <a-card class="method-card" v-for="method in filteredApiState" :key="method.id"
-                    :title="`${method.name}: ${method.method}`">
+                    :title="`${method.fullname}`">
               <div class="method-card__body">
                 <div class="method-card__result">
                   <a-icon class="method__check" type="check-circle"/>
@@ -32,8 +32,8 @@
                 </div>
                 <hr>
                 <div class="method__chart">
-                  <apexchart type="area" height="100%" :options="chartsOptions[method.id]"
-                             :series="chartsSeries[method.id]"></apexchart>
+                  <apexchart type="area" height="100%" :options="chartsOptions[period][method.id]"
+                             :series="chartsSeries[period][method.id]"></apexchart>
                 </div>
               </div>
             </a-card>
@@ -64,82 +64,79 @@ export default {
   },
   data() {
     return {
-      apiState: [],
-      apiStateCharts: [],
-      chartsOptions: [],
-      chartsSeries: [],
+      apiState: {},
+      chartsOptions: {},
+      chartsSeries: {},
+      period: 7,
       loading: true
     }
   },
   computed: {
     filteredApiState() {
+      const currentApiState = this.apiState[this.period];
       if (this.methodsSortFilter === 'name') {
-        return this.apiState.sort((m1, m2) => {
-          const name1 = m1.name.toLowerCase();
-          const name2 = m2.name.toLowerCase();
+        return currentApiState.sort((m1, m2) => {
+          const name1 = m1.fullname.toLowerCase();
+          const name2 = m2.fullname.toLowerCase();
           return name1 < name2 ? -1 : name1 > name2 ? 1 : 0;
         });
       } else if (this.methodsSortFilter === 'time') {
-        return this.apiState.sort((m1, m2) => {
+        return currentApiState.sort((m1, m2) => {
           return m2.averageResponseMS - m1.averageResponseMS;
         });
       } else if (this.methodsSortFilter === 'success') {
-        return this.apiState.sort((m1, m2) => {
+        return currentApiState.sort((m1, m2) => {
           return m1.successRate - m2.successRate;
         });
       }
-      return this.apiState;
+      return currentApiState;
     }
   },
   async mounted() {
     const service = 'all';
-    const offset = 0;
-    const length = 100;
-    this.apiState = await this.getApiState(service);
-    this.apiStateCharts = await this.getApiStateCharts(this.apiState, offset, length);
+    const chartsIntervals = [
+      {
+        frequency: 4,
+        period: 7
+      }, {
+        frequency: 1,
+        period: 30
+      }
+    ];
 
-    // Фейковые данные для тестов
-    this.apiState = Faker().getApiState();
-    this.apiStateCharts = Faker().getApiStateCharts(this.apiState, length);
+    for (const interval of chartsIntervals) {
+      // this.apiState[interval.period] = await this.getApiState(service, interval.frequency, interval.period);
 
-    for (const chart of this.apiStateCharts) {
-      this.chartsOptions[chart.id] = this.getChartOptions(chart);
-      this.chartsSeries[chart.id] = this.getChartSeries(chart);
+      // Фейковые данные для тестов
+      this.apiState[interval.period] = Faker().getApiState(interval.frequency, interval.period);
+
+      this.apiState[interval.period].forEach(method => {
+        const statLength =  method.statistics.length;
+        method.fullname = method.name + ': ' + method.method;
+        method.successRate = Math.round(method.statistics.reduce((p, c) => p + c.successRate, 0) / statLength);
+        method.averageResponseMS = Math.round(method.statistics.reduce((p, c) => p + c.averageResponseMS, 0) / statLength);
+      });
+    }
+
+    for (const period in this.apiState) {
+      this.chartsOptions[period] = {};
+      this.chartsSeries[period] = {};
+      for (const method of this.apiState[period]) {
+        this.chartsOptions[period][method.id] = this.getChartOptions(method);
+        this.chartsSeries[period][method.id] = this.getChartSeries(method);
+      }
     }
 
     this.loading = false;
   },
   methods: {
-    async getApiState(service) {
-      const apiState = await fetch(`/api/endpoints/${service}`);
+    async getApiState(service, frequency, period) {
+      const apiState = await fetch(`/api/endpoints/${service}?frequency=${frequency}&period=${period}`);
       if (apiState.ok) {
         return await apiState.json();
       } else {
         return [];
       }
-    },
-    async getApiStateCharts(apiState, offset, length) {
-      const apiStateCharts = [];
-      for (const method of apiState) {
-        const endpointId = method.id;
-        const apiStateChart = await fetch(`/api/endpoint/${endpointId}?offset=${offset}&length=${length}`);
-        if (apiStateChart.ok) {
-          const apiStateChartJson = await apiStateChart.json();
-          apiStateChartJson.events.sort((ev1, ev2) => {
-            return ev1.requestTime - ev2.requestTime;
-          });
-          apiStateCharts.push(apiStateChartJson);
-        } else {
-          // Если сервер не вернул данные по заданному методу
-          apiStateCharts.push({
-            id: endpointId,
-            name: method.name,
-            events: null
-          });
-        }
-      }
-
-      return apiStateCharts;
     },
     cropNum(num) {
       const strNum = '' + num;
@@ -148,23 +145,23 @@ export default {
     getChartSeries(chart) {
       const goodTime = [];
       const badTime = [];
-      const events = chart.events;
+      const statistics = chart.statistics;
       const badTimeConst = 0;
-      if (events.length > 0) {
-        goodTime.push(events[0].success ? events[0].responseMS : null);
-        badTime.push(events[0].success ? null : badTimeConst);
+      if (statistics.length > 0) {
+        goodTime.push(statistics[0].averageResponseMS);
+        badTime.push(statistics[0].averageResponseMS !== null ? null : badTimeConst);
       }
-      for (let i = 1; i < events.length; i++) {
-        if (events[i].success) {
-          goodTime.push(events[i].responseMS);
+      for (let i = 1; i < statistics.length; i++) {
+        if (statistics[i].averageResponseMS !== null) {
+          goodTime.push(statistics[i].averageResponseMS);
           badTime.push(null);
-          if (!events[i - 1].success) {
+          if (statistics[i - 1].averageResponseMS === null) {
             goodTime[i - 1] = badTimeConst;
           }
         } else {
           badTime.push(badTimeConst);
           goodTime.push(null);
-          if (events[i - 1].success) {
+          if (statistics[i - 1].averageResponseMS !== null) {
             goodTime[i] = badTimeConst;
           }
         }
@@ -178,10 +175,10 @@ export default {
       }];
     },
     getChartOptions(chart) {
-      let yMax = Math.max(...chart.events.map(event => {
-        return event.responseMS;
+      let yMax = Math.max(...chart.statistics.map(point => {
+        return point.averageResponseMS;
       }));
-      yMax = yMax < 500 ? 500 : yMax;
+      yMax = yMax < 500 ? 500 : yMax + 500 - yMax % 500;
       return {
         chart: {
           type: 'area',
@@ -225,8 +222,8 @@ export default {
         colors: ['#00e396', '#ff0040'],
         xaxis: {
           type: 'datetime',
-          categories: chart.events.map(value => {
-            const date = new Date(value.requestTime);
+          categories: chart.statistics.map(point => {
+            const date = new Date(point.bindPoint);
             return date.toISOString();
           })
         },
