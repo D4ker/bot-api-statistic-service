@@ -71,7 +71,7 @@ export default {
       apiState: {},
       chartsOptions: {},
       chartsSeries: {},
-      period: 7,
+      period: 0,
       loading: true
     }
   },
@@ -105,39 +105,61 @@ export default {
     const service = 'all';
     const chartsIntervals = [
       {
-        frequency: 4,
+        // frequency: 4,
+        frequency: 650, // Временный костыль
         period: 7
       }, {
-        frequency: 1,
+        // frequency: 1,
+        frequency: 700, // Временный костыль
         period: 30
       }
     ];
 
+    const apiStateSummary = await this.getApiStateSummary(service);
     for (const interval of chartsIntervals) {
-      // this.apiState[interval.period] = await this.getApiState(service, interval.frequency, interval.period);
+      this.apiState[interval.period] = await this.getApiState(service, interval.frequency, interval.period);
+
+      this.apiState[interval.period].forEach(method => {
+        method.fullname = method.name + ': ' + method.method;
+        method.successRate = apiStateSummary[method.id].successRate;
+        method.averageResponseMS = apiStateSummary[method.id].averageResponseMS;
+        method.statistics = method.statistic; // Временный костыль
+        method.statistics.map(point => point.averageResponseMS = point.averageResponseMs); // Временный костыль
+      });
 
       // Фейковые данные для тестов
-      this.apiState[interval.period] = Faker().getApiState(interval.frequency, interval.period);
+      // this.apiState[interval.period] = Faker().getApiState(interval.frequency, interval.period);
 
-      this.apiState[interval.period].forEach(method => method.fullname = method.name + ': ' + method.method);
-    }
-
-    for (const period in this.apiState) {
-      this.chartsOptions[period] = {};
-      this.chartsSeries[period] = {};
-      for (const method of this.apiState[period]) {
-        this.chartsOptions[period][method.id] = this.getChartOptions(method);
-        this.chartsSeries[period][method.id] = this.getChartSeries(method);
+      this.chartsOptions[interval.period] = {};
+      this.chartsSeries[interval.period] = {};
+      for (const method of this.apiState[interval.period]) {
+        this.chartsOptions[interval.period][method.id] = this.getChartOptions(method);
+        this.chartsSeries[interval.period][method.id] = this.getChartSeries(method);
       }
     }
 
     this.loading = false;
   },
   methods: {
+    async getApiStateSummary(service) {
+      const apiStateSummary = await fetch(`/api/endpoints/${service}/summary`);
+      if (apiStateSummary.ok) {
+        const apiStateSummaryJson = await apiStateSummary.json();
+        const apiStateSummaryObj = {};
+        for (const method of apiStateSummaryJson) {
+          apiStateSummaryObj[method.id] = {};
+          apiStateSummaryObj[method.id].successRate = method.successRate;
+          apiStateSummaryObj[method.id].averageResponseMS = method.averageResponseMS;
+        }
+        return apiStateSummaryObj;
+      } else {
+        return {};
+      }
+    },
     async getApiState(service, frequency, period) {
-      const apiState = await fetch(`/api/endpoints/${service}?frequency=${frequency}&period=${period}`);
-      if (apiState.ok) {
-        return await apiState.json();
+      const apiStateCharts = await fetch(`/api/endpoints/${service}?frequency=${frequency}&period=${period}`);
+      if (apiStateCharts.ok) {
+        return await apiStateCharts.json();
       } else {
         return [];
       }
@@ -207,33 +229,20 @@ export default {
           width: 2
         },
         tooltip: {
-          custom: function ({series, dataPointIndex}) {
-            let goodTimeValue = series[0][dataPointIndex];
-            let badTimeValue = series[1][dataPointIndex];
-            goodTimeValue = goodTimeValue > 0 ? goodTimeValue : '';
-            badTimeValue = badTimeValue === 0 ? badTimeValue : '';
-            return '<div class="arrow_box">' +
-              '<span>' + goodTimeValue + '</span>' +
-              '<div></div>' +
-              '<span>' + badTimeValue + '</span>' +
-              '</div>'
-          },
-          theme: 'dark',
-          x: {
-            format: 'dd-MM-yy HH:mm:ss'
-          }
+          enabled: false
         },
         colors: ['#00e396', '#ff0040'],
         xaxis: {
           type: 'datetime',
           categories: chart.statistics.map(point => {
-            const date = new Date(point.bindPoint);
+            const date = new Date(point.bindPoint * 1000);
             return date.toISOString();
           })
         },
         yaxis: {
           min: 0,
           max: yMax,
+          decimalsInFloat: 0,
           forceNiceScale: true
         },
       };
