@@ -54,6 +54,10 @@ export default {
       type: String,
       required: true
     },
+    methodsPeriodFilter: {
+      type: String,
+      required: true
+    },
     viewModeFilter: {
       type: String,
       required: true
@@ -73,6 +77,11 @@ export default {
   },
   computed: {
     filteredApiState() {
+      if (this.methodsPeriodFilter === '7-days') {
+        this.period = 7;
+      } else if (this.methodsPeriodFilter === '30-days') {
+        this.period = 30;
+      }
       const currentApiState = this.apiState[this.period];
       if (this.methodsSortFilter === 'name') {
         return currentApiState.sort((m1, m2) => {
@@ -223,6 +232,7 @@ export default {
           })
         },
         yaxis: {
+          min: 0,
           max: yMax,
           forceNiceScale: true
         },

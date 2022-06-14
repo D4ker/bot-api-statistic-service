@@ -6,10 +6,12 @@
     </div>
     <ApiStateSectionFilter
       @methodsSortFilter="(recMethodsSortFilter) => this.methodsSortFilter = recMethodsSortFilter"
+      @methodsPeriodFilter="(recMethodsPeriodFilter) => this.methodsPeriodFilter = recMethodsPeriodFilter"
       @viewModeFilter="(recViewModeFilter) => this.viewModeFilter = recViewModeFilter"/>
     <div class="api-state__container container">
       <ApiStateSectionList
         :methodsSortFilter="methodsSortFilter"
+        :methodsPeriodFilter="methodsPeriodFilter"
         :viewModeFilter="viewModeFilter"/>
     </div>
   </div>
@@ -27,6 +29,7 @@ export default {
   data() {
     return {
       methodsSortFilter: '',
+      methodsPeriodFilter: '',
       viewModeFilter: ''
     }
   },

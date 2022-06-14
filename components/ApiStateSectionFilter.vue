@@ -1,21 +1,33 @@
 <template>
   <div class="api-state-filter">
     <div class="api-state-filter__container container">
-      <div class="api-state-filter__sort">
-        <a-select
-          placeholder="Сортировать"
-          style="width: 100%"
-          :getPopupContainer="triggerNode => triggerNode.parentElement"
-          @change="handleChangeSort">
-          <a-select-option value="name">По названию</a-select-option>
-          <a-select-option value="time">По времени</a-select-option>
-          <a-select-option value="success">По процентам</a-select-option>
-        </a-select>
+      <div class="api-state-filter__select">
+        <div class="api-state-filter__sort">
+          <a-select
+            placeholder="Сортировать"
+            style="width: 100%"
+            :getPopupContainer="triggerNode => triggerNode.parentElement"
+            @change="handleChangeSort">
+            <a-select-option value="name">По названию</a-select-option>
+            <a-select-option value="time">По времени</a-select-option>
+            <a-select-option value="success">По процентам</a-select-option>
+          </a-select>
+        </div>
+        <div class="api-state-filter__period">
+          <a-select
+            placeholder="Период"
+            style="width: 100%"
+            v-model="periodFilter"
+            :getPopupContainer="triggerNode => triggerNode.parentElement"
+            @change="handleChangePeriod">
+            <a-select-option value="7-days">7 дней</a-select-option>
+            <a-select-option value="30-days">30 дней</a-select-option>
+          </a-select>
+        </div>
       </div>
       <a-radio-group
         class="api-state-filter__view-mode"
         v-model="viewModeFilter"
-        style="display: flex"
         @change="onChangeViewMode">
         <a-radio-button value="list">
           <a-icon type="menu"/>
@@ -32,15 +44,20 @@
 export default {
   data() {
     return {
+      periodFilter: '7-days',
       viewModeFilter: 'list'
     }
   },
   mounted() {
+    this.handleChangePeriod(this.periodFilter);
     this.sendViewMode(this.viewModeFilter);
   },
   methods: {
     handleChangeSort(value) {
       this.$emit('methodsSortFilter', value);
+    },
+    handleChangePeriod(value) {
+      this.$emit('methodsPeriodFilter', value);
     },
     onChangeViewMode(values) {
       this.sendViewMode(values.target.value);
@@ -71,14 +88,40 @@ export default {
     display: flex;
     justify-content: space-between;
     max-width: $api-state-width;
-    padding: 0 10px;
+    padding: 10px 10px;
 
-    .api-state-filter__sort {
-      width: 200px;
+    .api-state-filter__select {
+      display: flex;
+      flex-wrap: wrap;
+      width: 100%;
+
+      .api-state-filter__sort {
+        width: 200px;
+        margin-right: 20px;
+      }
+
+      .api-state-filter__period {
+        width: 200px;
+        margin-right: 20px;
+      }
     }
 
     .api-state-filter__view-mode {
+      display: flex;
+      justify-content: flex-end;
+      max-width: 103px;
+      width: 100%;
       font-size: 20px;
+
+      @media (max-width: 563px) {
+        flex-direction: column;
+        align-items: flex-end;
+      }
+
+      ::v-deep .ant-radio-button-wrapper {
+        width: 51px;
+        border-radius: unset;
+      }
     }
   }
 }
