@@ -105,12 +105,10 @@ export default {
     const service = 'all';
     const chartsIntervals = [
       {
-        // frequency: 4,
-        frequency: 650, // Временный костыль
+        frequency: 4,
         period: 7
       }, {
-        // frequency: 1,
-        frequency: 700, // Временный костыль
+        frequency: 1,
         period: 30
       }
     ];
@@ -119,16 +117,12 @@ export default {
     for (const interval of chartsIntervals) {
       this.apiState[interval.period] = await this.getApiState(service, interval.frequency, interval.period);
 
-      this.apiState[interval.period].forEach(method => {
-        method.fullname = method.name + ': ' + method.method;
-        method.successRate = apiStateSummary[method.id].successRate;
-        method.averageResponseMS = apiStateSummary[method.id].averageResponseMS;
-        method.statistics = method.statistic; // Временный костыль
-        method.statistics.map(point => point.averageResponseMS = point.averageResponseMs); // Временный костыль
-      });
-
       // Фейковые данные для тестов
       // this.apiState[interval.period] = Faker().getApiState(interval.frequency, interval.period);
+
+      this.apiState[interval.period].forEach(method => {
+        method.fullname = method.name + ': ' + method.method;
+      });
 
       this.chartsOptions[interval.period] = {};
       this.chartsSeries[interval.period] = {};
