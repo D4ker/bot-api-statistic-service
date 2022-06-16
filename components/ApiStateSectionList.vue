@@ -122,6 +122,8 @@ export default {
 
       this.apiState[interval.period].forEach(method => {
         method.fullname = method.name + ': ' + method.method;
+        method.successRate = apiStateSummary[method.id].successRate;
+        method.averageResponseMS = apiStateSummary[method.id].averageResponseMS;
       });
 
       this.chartsOptions[interval.period] = {};
