@@ -33,6 +33,11 @@ export default {
       viewModeFilter: ''
     }
   },
+  async fetch() {
+    if (Object.keys(this.$store.getters['api-state/apiState']).length === 0) {
+      await this.$store.dispatch('api-state/getApiState');
+    }
+  },
 }
 </script>
 

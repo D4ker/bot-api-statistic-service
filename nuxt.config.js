@@ -25,17 +25,6 @@ export default {
     port: process.env.NUXT_PORT,
   },
 
-  axios: {
-    proxy: true
-  },
-
-  proxy: {
-    '/api/': {
-      target: 'http://localhost:5000',
-      pathRewrite: {'^/api/': '/'}
-    }
-  },
-
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [
     'ant-design-vue/dist/antd.css',

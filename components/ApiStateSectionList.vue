@@ -32,8 +32,8 @@
                 </div>
                 <hr>
                 <div class="method__chart">
-                  <apexchart type="area" height="100%" :options="chartsOptions[period][method.id]"
-                             :series="chartsSeries[period][method.id]"></apexchart>
+                  <apexchart type="area" height="100%" :options="method.chartsOptions"
+                             :series="method.chartsSeries"></apexchart>
                 </div>
               </div>
             </a-card>
@@ -46,7 +46,6 @@
 
 <script>
 import ApiStateSectionListLoader from './ApiStateSectionListLoader';
-import Faker from "../modules/faker";
 
 export default {
   props: {
@@ -68,21 +67,21 @@ export default {
   },
   data() {
     return {
-      apiState: {},
-      chartsOptions: {},
-      chartsSeries: {},
-      period: 0,
       loading: true
     }
   },
   computed: {
+    apiState() {
+      return this.$store.getters['api-state/apiState'];
+    },
     filteredApiState() {
+      let period = -1;
       if (this.methodsPeriodFilter === '7-days') {
-        this.period = 7;
+        period = 7;
       } else if (this.methodsPeriodFilter === '30-days') {
-        this.period = 30;
+        period = 30;
       }
-      const currentApiState = this.apiState[this.period];
+      const currentApiState = structuredClone(this.apiState)[period];
       if (this.methodsSortFilter === 'name') {
         return currentApiState.sort((m1, m2) => {
           const name1 = m1.fullname.toLowerCase();
@@ -102,146 +101,12 @@ export default {
     }
   },
   async mounted() {
-    const service = 'all';
-    const chartsIntervals = [
-      {
-        frequency: 4,
-        period: 7
-      }, {
-        frequency: 1,
-        period: 30
-      }
-    ];
-
-    const apiStateSummary = await this.getApiStateSummary(service);
-    for (const interval of chartsIntervals) {
-      this.apiState[interval.period] = await this.getApiState(service, interval.frequency, interval.period);
-
-      // Фейковые данные для тестов
-      // this.apiState[interval.period] = Faker().getApiState(interval.frequency, interval.period);
-
-      this.apiState[interval.period].forEach(method => {
-        method.fullname = method.name + ': ' + method.method;
-        method.successRate = apiStateSummary[method.id].successRate;
-        method.averageResponseMS = apiStateSummary[method.id].averageResponseMS;
-      });
-
-      this.chartsOptions[interval.period] = {};
-      this.chartsSeries[interval.period] = {};
-      for (const method of this.apiState[interval.period]) {
-        this.chartsOptions[interval.period][method.id] = this.getChartOptions(method);
-        this.chartsSeries[interval.period][method.id] = this.getChartSeries(method);
-      }
-    }
-
     this.loading = false;
   },
   methods: {
-    async getApiStateSummary(service) {
-      const apiStateSummary = await fetch(`/api/endpoints/${service}/summary`);
-      if (apiStateSummary.ok) {
-        const apiStateSummaryJson = await apiStateSummary.json();
-        const apiStateSummaryObj = {};
-        for (const method of apiStateSummaryJson) {
-          apiStateSummaryObj[method.id] = {};
-          apiStateSummaryObj[method.id].successRate = method.successRate;
-          apiStateSummaryObj[method.id].averageResponseMS = method.averageResponseMS;
-        }
-        return apiStateSummaryObj;
-      } else {
-        return {};
-      }
-    },
-    async getApiState(service, frequency, period) {
-      const apiStateCharts = await fetch(`/api/endpoints/${service}?frequency=${frequency}&period=${period}`);
-      if (apiStateCharts.ok) {
-        return await apiStateCharts.json();
-      } else {
-        return [];
-      }
-    },
     cropNum(num) {
       const strNum = '' + num;
       return num >= 1e9 ? '∞' : num >= 1e6 ? `${strNum.slice(0, -6)}KK` : num >= 1e3 ? `${strNum.slice(0, -3)}K` : num
-    },
-    getChartSeries(chart) {
-      const goodTime = [];
-      const badTime = [];
-      const statistics = chart.statistics;
-      const badTimeConst = 0;
-      if (statistics.length > 0) {
-        goodTime.push(statistics[0].averageResponseMS);
-        badTime.push(statistics[0].averageResponseMS !== null ? null : badTimeConst);
-      }
-      for (let i = 1; i < statistics.length; i++) {
-        if (statistics[i].averageResponseMS !== null) {
-          goodTime.push(statistics[i].averageResponseMS);
-          badTime.push(null);
-          if (statistics[i - 1].averageResponseMS === null) {
-            goodTime[i - 1] = badTimeConst;
-          }
-        } else {
-          badTime.push(badTimeConst);
-          goodTime.push(null);
-          if (statistics[i - 1].averageResponseMS !== null) {
-            goodTime[i] = badTimeConst;
-          }
-        }
-      }
-      return [{
-        name: '',
-        data: goodTime
-      }, {
-        name: '',
-        data: badTime
-      }];
-    },
-    getChartOptions(chart) {
-      let yMax = Math.max(...chart.statistics.map(point => {
-        return point.averageResponseMS;
-      }));
-      yMax = yMax < 500 ? 500 : yMax + 500 - yMax % 500;
-      return {
-        chart: {
-          type: 'area',
-          height: 250,
-          toolbar: {
-            show: false
-          },
-          zoom: {
-            enabled: false
-          },
-          animations: {
-            enabled: false
-          }
-        },
-        dataLabels: {
-          enabled: false
-        },
-        legend: {
-          show: false
-        },
-        stroke: {
-          width: 2
-        },
-        tooltip: {
-          enabled: false
-        },
-        colors: ['#00e396', '#ff0040'],
-        xaxis: {
-          type: 'datetime',
-          categories: chart.statistics.map(point => {
-            const date = new Date(point.bindPoint * 1000);
-            return date.toISOString();
-          })
-        },
-        yaxis: {
-          min: 0,
-          max: yMax,
-          decimalsInFloat: 0,
-          forceNiceScale: true
-        },
-      };
     }
   }
 };
