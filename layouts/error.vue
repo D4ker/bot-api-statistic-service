@@ -1,6 +1,6 @@
 <template>
   <section>
-    <h1>Такой страницы пока что не существует :(</h1>
+    <h1>Страница недоступна, попробуйте зайти позже :(</h1>
     <nuxt-link to="/">Вернуться назад</nuxt-link>
   </section>
 </template>
@@ -8,7 +8,9 @@
 <style scoped lang="scss">
 section {
   margin: 0 auto;
-  width: 600px;
+  padding: 0 20px;
+  max-width: 600px;
+  width: 100%;
 }
 h1 {
   color: $color-black;

@@ -13,7 +13,7 @@
         </ul>
       </nav>
       <div class="footer__logo-text">
-        <nuxt-link to="/">bass.ru</nuxt-link>
+        <nuxt-link to="/">tamtambotapistats.ru</nuxt-link>
       </div>
     </div>
   </div>

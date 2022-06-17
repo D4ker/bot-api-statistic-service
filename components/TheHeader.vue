@@ -10,7 +10,7 @@
       </div>
       <div class="header__contacts">
         <a href="mailto:bass@mail.ru">
-          <p class="header__mail_text">bass@mail.ru</p>
+          <p class="header__mail_text">tamtambotapistats@mail.ru</p>
           <img class="header__mail_icon" src="~/assets/img/mail.svg" alt="mail">
         </a>
       </div>

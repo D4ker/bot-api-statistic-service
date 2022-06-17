@@ -131,6 +131,10 @@ export default {
         justify-content: space-between;
         padding: 15px 10px;
 
+        .method__name {
+          word-break: break-all;
+        }
+
         .method__result {
           display: grid;
           grid-template-columns: auto 70px 70px;
