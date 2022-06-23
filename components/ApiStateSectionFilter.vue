@@ -3,9 +3,11 @@
     <div class="api-state-filter__container container">
       <div class="api-state-filter__select">
         <div class="api-state-filter__sort">
+          Сортировать
           <a-select
             placeholder="Сортировать"
             style="width: 100%"
+            v-model="sortFilter"
             :getPopupContainer="triggerNode => triggerNode.parentElement"
             @change="handleChangeSort">
             <a-select-option value="name">По названию</a-select-option>
@@ -14,6 +16,7 @@
           </a-select>
         </div>
         <div class="api-state-filter__period">
+          Период
           <a-select
             placeholder="Период"
             style="width: 100%"
@@ -44,11 +47,13 @@
 export default {
   data() {
     return {
+      sortFilter: 'name',
       periodFilter: '7-days',
       viewModeFilter: 'list'
     }
   },
   mounted() {
+    this.handleChangeSort(this.sortFilter);
     this.handleChangePeriod(this.periodFilter);
     this.sendViewMode(this.viewModeFilter);
   },
@@ -109,12 +114,14 @@ export default {
     .api-state-filter__view-mode {
       display: flex;
       justify-content: flex-end;
+      align-items: center;
       max-width: 103px;
       width: 100%;
       font-size: 20px;
 
       @media (max-width: 563px) {
         flex-direction: column;
+        justify-content: center;
         align-items: flex-end;
       }
 

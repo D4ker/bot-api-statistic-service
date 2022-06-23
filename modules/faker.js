@@ -1,6 +1,6 @@
 // Модуль генерации фейковых данных для тестов
 export default function Faker() {
-  function getApiState(frequency, period) {
+  function getApiState() {
     const methodsNames = [
       'users',
       'friends',
@@ -28,15 +28,17 @@ export default function Faker() {
     let id = 0;
     for (const name of methodsNames) {
       for (const method of restMethods) {
+        const fullname = name + ': ' + method;
         const successRate = Math.round(Math.random() * 100);
         const averageResponseMS = Math.random() > 0.98 ? Math.round(Math.random() * 3000) : Math.round(Math.random() * 300);
-        const statistics = getApiStateCharts(apiState, frequency, period);
         apiState.push({
           id,
           name,
+          fullname,
+          chartsSeries: [],
+          chartsOptions: {},
           successRate,
           averageResponseMS,
-          statistics,
           method
         });
         id++;
@@ -45,14 +47,25 @@ export default function Faker() {
     return apiState;
   }
 
-  function getApiStateCharts(apiState, frequency, period) {
+  function getApiStateStatistics(frequency, period) {
+    const apiStateStatistics = getApiState();
+
+    const apiStateStatisticsObj = {};
+    apiStateStatistics.forEach(method => {
+      apiStateStatisticsObj[method.id] = method;
+      apiStateStatisticsObj[method.id].statistics = getApiStateCharts(frequency, period);
+    });
+
+    return apiStateStatisticsObj;
+  }
+
+  function getApiStateCharts(frequency, period) {
     const pointsCount = frequency * period;
     const statistics = [];
     for (let id = 0; id <= pointsCount; id++) {
-      const success = statistics.length > 0 && statistics[id - 1].averageResponseMS === null ? Math.random() < 0.3 : Math.random() < 0.9;
-      const successRate = !success ? null : Math.round(Math.random() * 100);
-      const averageResponseMS = !success ? null : Math.random() > 0.98 ? Math.round(Math.random() * 3000) : Math.round(Math.random() * 300);
-      const bindPoint = new Date().setHours(0, 0, 0, 0) - (pointsCount - id) * 1000 * 60 * 60 * 24 / frequency;
+      const successRate = Math.floor(Math.random() * 101) / 100;
+      const averageResponseMS = successRate < 0.6 ? 0 : Math.random() > 0.98 ? Math.round(Math.random() * 3000) : Math.round(Math.random() * 300);
+      const bindPoint = new Date().setHours(0, 0, 0, 0) / 1000 - (pointsCount - id) * 60 * 60 * 24 / frequency;
       statistics.push({
         successRate,
         averageResponseMS,
@@ -64,6 +77,6 @@ export default function Faker() {
 
   return {
     getApiState,
-    getApiStateCharts
+    getApiStateStatistics
   };
 }

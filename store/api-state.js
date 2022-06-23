@@ -3,7 +3,7 @@ import Faker from '../modules/faker';
 const Constants = require('../constants/constants');
 
 export const state = () => ({
-  apiState: {}
+  apiState: []
 })
 
 export const mutations = {
@@ -14,22 +14,20 @@ export const mutations = {
 
 export const actions = {
   async getApiState({commit}) {
-    const apiState = {};
-    const apiStateSummary = await getApiStateSummary(Constants.service.ALL);
+    // const apiState = await getApiState(Constants.service.ALL);
 
+    // Фейковые данные для тестов
+    const apiState = Faker().getApiState();
     for (const interval of Constants.chartsIntervals) {
-      apiState[interval.period] = await getApiState(Constants.service.ALL, interval.frequency, interval.period);
+      // const apiStateStatistics = await getApiStateStatistics(Constants.service.ALL, interval.frequency, interval.period);
 
       // Фейковые данные для тестов
-      //  apiState[interval.period] = Faker().getApiState(interval.frequency, interval.period);
+      const apiStateStatistics = Faker().getApiStateStatistics(interval.frequency, interval.period);
 
-      apiState[interval.period].forEach(method => {
-        method.fullname = method.name + ': ' + method.method;
-        method.successRate = apiStateSummary[method.id].successRate;
-        method.averageResponseMS = apiStateSummary[method.id].averageResponseMS;
-
-        method.chartsOptions = getChartOptions(method);
-        method.chartsSeries = getChartSeries(method);
+      apiState.forEach(method => {
+        const statistics = apiStateStatistics[method.id].statistics;
+        method.chartsSeries[interval.period] = getChartSeries(statistics);
+        method.chartsOptions[interval.period] = getChartOptions(statistics);
       });
     }
 
@@ -41,51 +39,54 @@ export const getters = {
   apiState: state => state.apiState
 }
 
-async function getApiStateSummary(service) {
-  const apiStateSummary = await fetch(`${Constants.serverUrl}/endpoints/${service}/summary`);
-  if (apiStateSummary.ok) {
-    const apiStateSummaryJson = await apiStateSummary.json();
-    const apiStateSummaryObj = {};
-    for (const method of apiStateSummaryJson) {
-      apiStateSummaryObj[method.id] = {};
-      apiStateSummaryObj[method.id].successRate = method.successRate;
-      apiStateSummaryObj[method.id].averageResponseMS = method.averageResponseMS;
-    }
-    return apiStateSummaryObj;
+async function getApiState(service) {
+  const apiState = await fetch(`${Constants.serverUrl}/endpoints/${service}/summary`);
+  if (apiState.ok) {
+    const apiStateJson = await apiState.json();
+    apiStateJson.forEach(method => {
+      method.fullname = method.name + ': ' + method.method;
+      method.chartsSeries = [];
+      method.chartsOptions = {};
+    });
+    return apiStateJson;
   } else {
     return {};
   }
 }
 
-async function getApiState(service, frequency, period) {
-  const apiStateCharts = await fetch(`${Constants.serverUrl}/endpoints/${service}?frequency=${frequency}&period=${period}`);
-  if (apiStateCharts.ok) {
-    return await apiStateCharts.json();
+async function getApiStateStatistics(service, frequency, period) {
+  const apiStateStatistics = await fetch(`${Constants.serverUrl}/endpoints/${service}?frequency=${frequency}&period=${period}`);
+  if (apiStateStatistics.ok) {
+    const apiStateStatisticsJson = await apiStateStatistics.json();
+    const apiStateStatisticsObj = {};
+    apiStateStatisticsJson.forEach(method => {
+      apiStateStatisticsObj[method.id] = method;
+    });
+    return apiStateStatisticsObj;
   } else {
     return [];
   }
 }
 
-function getChartSeries(chart) {
+function getChartSeries(statistics) {
   const goodTime = [];
   const badTime = [];
-  const statistics = chart.statistics;
   const badTimeConst = 0;
   if (statistics.length > 0) {
-    goodTime.push(statistics[0].averageResponseMS);
-    badTime.push(statistics[0].averageResponseMS !== null ? null : badTimeConst);
+    goodTime.push(statistics[0].averageResponseMS === null || statistics[0].successRate < 0.6 ? null : statistics[0].averageResponseMS);
+    badTime.push(statistics[0].averageResponseMS !== null && statistics[0].successRate >= 0.6 ? null : badTimeConst);
   }
   for (let i = 1; i < statistics.length; i++) {
-    if (statistics[i].averageResponseMS !== null) {
+    if (statistics[i].averageResponseMS !== null && statistics[i].successRate >= 0.6) {
       goodTime.push(statistics[i].averageResponseMS);
       badTime.push(null);
-      if (statistics[i - 1].averageResponseMS === null) {
+      if (statistics[i - 1].averageResponseMS === null || statistics[i - 1].successRate < 0.6) {
         goodTime[i - 1] = badTimeConst;
       }
     } else {
       badTime.push(badTimeConst);
       goodTime.push(null);
-      if (statistics[i - 1].averageResponseMS !== null) {
+      if (statistics[i - 1].averageResponseMS !== null && statistics[i - 1].successRate >= 0.6) {
         goodTime[i] = badTimeConst;
       }
     }
@@ -99,11 +100,7 @@ function getChartSeries(chart) {
   }];
 }
 
-function getChartOptions(chart) {
-  let yMax = Math.max(...chart.statistics.map(point => {
-    return point.averageResponseMS;
-  }));
-  yMax = yMax < 500 ? 500 : yMax + 500 - yMax % 500;
+function getChartOptions(statistics) {
   return {
     chart: {
       type: 'area',
@@ -130,17 +127,20 @@ function getChartOptions(chart) {
     tooltip: {
       enabled: false
     },
+    markers: {
+      //size: [0, 3],
+      showNullDataPoints: true
+    },
     colors: ['#00e396', '#ff0040'],
     xaxis: {
       type: 'datetime',
-      categories: chart.statistics.map(point => {
+      categories: statistics.map(point => {
         const date = new Date(point.bindPoint * 1000);
         return date.toISOString();
       })
     },
     yaxis: {
       min: 0,
-      max: yMax,
       decimalsInFloat: 0,
       forceNiceScale: true
     },

@@ -31,9 +31,13 @@
                   <p class="method__success">{{ cropNum(method.successRate) }}%</p>
                 </div>
                 <hr>
-                <div class="method__chart">
-                  <apexchart type="area" height="100%" :options="method.chartsOptions"
-                             :series="method.chartsSeries"></apexchart>
+                <div v-show="methodsPeriodFilter === '7-days'" class="method__chart">
+                  <apexchart type="area" height="100%" :options="method.chartsOptions[7]"
+                             :series="method.chartsSeries[7]"></apexchart>
+                </div>
+                <div v-show="methodsPeriodFilter === '30-days'" class="method__chart">
+                  <apexchart type="area" height="100%" :options="method.chartsOptions[30]"
+                             :series="method.chartsSeries[30]"></apexchart>
                 </div>
               </div>
             </a-card>
@@ -67,21 +71,16 @@ export default {
   },
   data() {
     return {
+      localApiState: [],
       loading: true
     }
   },
   computed: {
     apiState() {
-      return this.$store.getters['api-state/apiState'];
+      return this.$store.getters['api-state/apiState'].slice();
     },
     filteredApiState() {
-      let period = -1;
-      if (this.methodsPeriodFilter === '7-days') {
-        period = 7;
-      } else if (this.methodsPeriodFilter === '30-days') {
-        period = 30;
-      }
-      const currentApiState = structuredClone(this.apiState)[period];
+      const currentApiState = this.apiState;
       if (this.methodsSortFilter === 'name') {
         return currentApiState.sort((m1, m2) => {
           const name1 = m1.fullname.toLowerCase();
