@@ -14,15 +14,15 @@ export const mutations = {
 
 export const actions = {
   async getApiState({commit}) {
-    // const apiState = await getApiState(Constants.service.ALL);
+    const apiState = await getApiState(Constants.service.ALL);
 
     // Фейковые данные для тестов
-    const apiState = Faker().getApiState();
+    // const apiState = Faker().getApiState();
     for (const interval of Constants.chartsIntervals) {
-      // const apiStateStatistics = await getApiStateStatistics(Constants.service.ALL, interval.frequency, interval.period);
+      const apiStateStatistics = await getApiStateStatistics(Constants.service.ALL, interval.frequency, interval.period);
 
       // Фейковые данные для тестов
-      const apiStateStatistics = Faker().getApiStateStatistics(interval.frequency, interval.period);
+      // const apiStateStatistics = Faker().getApiStateStatistics(interval.frequency, interval.period);
 
       apiState.forEach(method => {
         const statistics = apiStateStatistics[method.id].statistics;
@@ -128,7 +128,23 @@ function getChartOptions(statistics) {
       enabled: false
     },
     markers: {
-      //size: [0, 3],
+      fillColor: '#ff0040',
+      strokeColor: '#ff0040',
+      discrete: [{
+        seriesIndex: 1,
+        dataPointIndex: 0,
+        fillColor: '#ff0040',
+        strokeColor: '#ff0040',
+        size: 1,
+        shape: 'circle'
+      }, {
+          seriesIndex: 1,
+          dataPointIndex: statistics.length - 1,
+          fillColor: '#ff0040',
+          strokeColor: '#ff0040',
+          size: 1,
+          shape: 'circle'
+        }],
       showNullDataPoints: true
     },
     colors: ['#00e396', '#ff0040'],

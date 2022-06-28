@@ -119,6 +119,10 @@ export default {
 
 .methods-container {
 
+  ::v-deep .ant-tabs.ant-tabs-card .ant-tabs-card-content > .ant-tabs-tabpane {
+    transition: opacity 0.45s !important;
+  }
+
   ::v-deep .ant-tabs-bar {
     display: none;
   }
